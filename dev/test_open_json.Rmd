@@ -1,0 +1,22 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+alog_input = "C:/W_shortcut/coffeeroastingprofiles/data-raw/21-02-17_1840_ZambiaKasama_1stcrack.alog"
+```
+
+```{r open alog}
+   sub <- readLines(alog_input)
+    # incomplete final line found on (c..) - could be bc you need to add line at
+    # end of json Must replace ' and change True/False so it has quotes in order
+    # to read as a JSON
+    sub <- gsub("\\'", '"', sub)
+    sub <- gsub("True", '\"True\"', sub)
+    sub <- gsub("False", '\"False\"', sub)
+    
+    profile_as_json <- jsonlite::fromJSON(sub)
+
+    profile_as_json$timex %>% as.data.frame()
+```

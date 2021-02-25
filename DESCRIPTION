@@ -1,0 +1,38 @@
+Package: coffeeroastingprofiles
+Title: Coffee roasting profiles
+Version: 0.0.0.9000
+Authors@R: person('Jacci', 'Ziebert', email = 'jacciziebert@gmail.com', role = c('cre', 'aut'))
+Description: A comparison of cupping notes, profiles
+License: What license is it under?
+Imports: 
+    config,
+    golem,
+    shiny,
+    processx,
+    attempt,
+    DT,
+    glue,
+    htmltools,
+    thinkr,
+    shinydashboard,
+    shinyWidgets,
+    shinythemes,
+    plotly,
+    formattable,
+    lubridate,
+    shinyFeedback,
+    RSQLite,
+    pool,
+    tidyr,
+    utils
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.1
+Suggests: 
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+Depends: 
+    R (>= 2.10)
