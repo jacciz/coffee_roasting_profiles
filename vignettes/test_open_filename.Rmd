@@ -1,0 +1,23 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+filename <-
+  jsonlite::read_json("C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/saved/Angola--2021-02-25-17-09-27.json")
+# filename2 <-
+# jsonlite::toJSON("C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/saved/Angola--2021-02-26-16-16-22.json")
+```
+```{r}
+get_data_to_display_at_upload(filename)
+get_special_event_times(filename)
+get_data_of_times_temps(filename) # nope
+get_event_times(filename)
+get_data_of_phase_times(filename)
+```
+

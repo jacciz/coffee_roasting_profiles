@@ -145,3 +145,33 @@ mod_chart_roasting_profile_server <- function(id, profile) {
 }
 
 
+#' chart_roasting_profile UI Function
+#'
+#' @description A shiny Module.
+#'
+#' @param id,input,output,session Internal parameters for {shiny}.
+#'
+#' @noRd 
+#'
+#' @importFrom shiny NS tagList 
+mod_chart_roasting_profile_ui <- function(id){
+  ns <- NS(id)
+  tagList(
+ 
+  )
+}
+    
+#' chart_roasting_profile Server Function
+#'
+#' @noRd 
+mod_chart_roasting_profile_server <- function(input, output, session){
+  ns <- session$ns
+ 
+}
+    
+## To be copied in the UI
+# mod_chart_roasting_profile_ui("chart_roasting_profile_ui_1")
+    
+## To be copied in the server
+# callModule(mod_chart_roasting_profile_server, "chart_roasting_profile_ui_1")
+ 

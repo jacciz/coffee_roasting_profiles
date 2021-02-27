@@ -14,6 +14,16 @@ app_server <- function( input, output, session ) {
   #         dbReadTable(pool, "roast_profiles") %>% filter(country == input$country)# filter(Org_Name %in% input$health_clinic)
   #     })
 
+  get_profile_database <- # Based on country for now
+      reactive({
+          pool::dbReadTable(pool, "roast_profiles") #%>% filter(country == input$country)# filter(Org_Name %in% input$health_clinic)
+      })
+  open_profile_by_filename <- # Based on country for now
+    reactive({
+      pool::dbReadTable(pool, "roast_profiles") %>% filter(filename == nput$selected_filename)
+    })
+
+
   # When selected data changes, table gets updated
   # jittered_iris <- reactive({
   #     haiti
@@ -41,8 +51,10 @@ app_server <- function( input, output, session ) {
   # })
 
   #  -------------- The Roast Profile Analysis Line Chart --------------------
-  mod_chart_roasting_profile_server("roast_profile_chart", haiti)
-
+  # mod_chart_roasting_profile_server("roast_profile_chart", open_profile_by_filename())
+  # output$summary_profile_data <- function(){
+  #
+  # }
   output$roasting_profile_data <- renderFormattable({
 
     get_roasting_profile_data <- function(df) {
@@ -87,126 +99,7 @@ app_server <- function( input, output, session ) {
     ))
   })
   #  -------------- The Roast Profile --------------------
-  # output$roast_profile <- renderPlotly({
-  #   # Get data for certain parameters for chart
-  #   # data <- roasting_profile_data()
-  #   time_zero = as_datetime("1970-01-01 00:00:00 UTC")
-  #   time_max = max(as_datetime(haiti$Time2), na.rm = TRUE)
-  #   dry_end = as_datetime(haiti$Time2[grepl("Dry End", haiti$Event), "Time2"])
-  #   first_crack_start = as_datetime(haiti$Time2[grepl("FCs", haiti$Event), "Time2"])
-  #   first_crack_end = as_datetime(haiti$Time2[grepl("FCe", haiti$Event), "Time2"])
-  #   drop_start = as_datetime(haiti$Time2[grepl("Drop", haiti$Event), "Time2"])
-  #   max_temp = 500 # Highest temp in chart
-  #   # print(haiti$Time2)
-  #   plot_ly(
-  #     # BT Line
-  #     haiti,
-  #     type = 'scatter',
-  #     mode = 'lines',
-  #     x = ~ lubridate::as_datetime(Time2),
-  #     line = list(color = "#4DB848"),
-  #     # x = ~seq(ms("00:00"), ms("10:10")),
-  #     # x = ~ lubridate::ms(Time2),
-  #     # x = ~ lubridate::as_datetime(Time1),
-  #     y = ~ BT,
-  #     # hovertemplate = paste('%{y: .1f}\u00b0F', '<br>%{x}<br>'),
-  #     hovertemplate = '%{y: .1f}\u00b0F',
-  #     showlegend = FALSE,
-  #     name = "BT"
-  #   ) %>%
-  #     add_trace(         # ET Line
-  #       mode = 'lines',
-  #       x = ~ lubridate::as_datetime(Time2),
-  #       y = ~ ET,
-  #       line = list(color = "#D50032"),
-  #       name = "ET"
-  #     ) %>%
-  #     add_trace(        # Change BT Line
-  #       mode = 'lines',
-  #       x = ~ lubridate::as_datetime(Time2),
-  #       y = ~ change_BT,
-  #       line = list(color = "#428BCA"),
-  #       name = "\u0394BT",
-  #       yaxis = "y2"
-  #     ) %>% layout(hovermode = "x unified") %>%
-  #     filter(!is.na(Event),
-  #            !is.na(Time2),
-  #            Event != "Drop",
-  #            !grepl("^Charge", Event)) %>%
-  #     add_annotations(
-  #       # x =  ~lubridate::as_datetime(Time2), # jitter() ?
-  #       # y = ~ jitter(BT, 60),
-  #       text = ~ Event,
-  #       # yaxis = "y2",
-  #       textposition = "top center",
-  #       arrowhead = .5,
-  #       arrowwidth = 1,
-  #       font = list(size = 12, color = "#ffffff"),
-  #       bgcolor = ~ event_color
-  #     ) %>%                     # Add lines for phases
-  #     add_segments( x = ~dry_end, xend = ~dry_end, y =~ 0, yend=~500,
-  #                   # opacity = 1,
-  #                   line = list(dash="dash",
-  #                               color = '#AAAAAA',
-  #                               width = 2), text = "Dry end") %>%
-  #     add_segments( x = ~first_crack_start, xend = ~first_crack_start, y =~ 0, yend=~500,
-  #                   # opacity = 1,
-  #                   line = list(dash="dash",
-  #                               color = '#AAAAAA',
-  #                               width = 2), text = "FC start") %>%
-  #     add_segments( x = ~first_crack_end, xend = ~first_crack_end, y =~ 0, yend=~500,
-  #                   # opacity = 1,
-  #                   line = list(dash="dash",
-  #                               color = '#AAAAAA',
-  #                               width = 2), text = "FC start") %>%
-  #     # For second_crash_start
-  #     # add_segments( x = ~first_crack_start, xend = ~first_crack_start, y =~ 0, yend=~500,
-  #     #               # opacity = 1,
-  #     #               line = list(dash="dash",
-  #     #                           color = 'gray80',
-  #     #                           width = 2), text = "FC start") %>%
-  #     layout(
-  #       # The right side y-axis
-  #       yaxis2 = list(
-  #         zeroline = F,
-  #         showline = F,
-  #         showgrid = F,
-  #         tickfont = list(color = "#428BCA"),
-  #         ticksuffix = "\u00b0F",
-  #         overlaying = "y",
-  #         side = "right",
-  #         title = ""
-  #       ),
-  #       xaxis = list(
-  #         # gridcolor = toRGB("gray85"),
-  #         title = "",
-  #         zeroline = F,
-  #         showline = F,
-  #         showgrid = F,
-  #         tick0 = time_zero,
-  #         ticks = "inside",
-  #         tickcolor = "grey80",
-  #         tickformat = "%M:%S",
-  #         dtick = 30000 # Tick every 30 seconds
-  #       ),
-  #       yaxis = list(
-  #         title = "",
-  #         ticksuffix = "\u00b0F",
-  #         zeroline = F,
-  #         showline = F,
-  #         showgrid = F
-  #       ),
-  #       margin = list(
-  #         r = 30,
-  #         l = 0,
-  #         b = 0,
-  #         t = 0
-  #       ),
-  #       plot_bgcolor = 'rgb(245,245,245)',
-  #       # make grey background
-  #       paper_bgcolor = 'rgb(245,245,245)'
-  #     )
-  # })
+
   #  -------------- The Roast Profile datatable --------------------
   output$hover <- renderText({
     input$hover_data
@@ -293,9 +186,6 @@ app_server <- function( input, output, session ) {
   #  -------------- Input Roast Data from file/user --------------------
   # Example: https://www.youtube.com/user/RodCoelho/search?query=MySQL Don't need loadDropdown as we are not deleting records
 
-
-
-
   # # name
   # list_data <- loadData(c("primary_key", "roast_date", "country"), "roast_profiles") %>% as.data.frame()
   # list_data <- rbind(data.frame("primary_key" = 0, "roast_date" = Sys.Date(), "country" = "Other"),list_data) # Adds a new row of empty values
@@ -315,56 +205,64 @@ app_server <- function( input, output, session ) {
 
 
   #  -------------- Input Roast Data - Dropdowns for Form --------------------
+
+  output$get_filenames_saved <- renderUI({
+    uploaded_filenames <- get_profile_database()$filename #%>% rev()
+    # print(unique_key_list) #does print list
+    # print(filtered_orders_with_contacts()) works
+    selectInput("selected_filename", "Choose file", uploaded_filenames, width = '100%', selected = NULL)
+  })
+  output$get_data_upload_date <- renderUI({
+    unique_upload_dates <- get_profile_database()$date_uploaded %>% unique()
+    # print(unique_key_list) #does print list
+    # print(filtered_orders_with_contacts()) works
+    selectInput("selected_upload_date", "Upload date", unique_upload_dates, width = '100%', selected = NULL)
+  })
   # Make dropdown menu of all countries, roast machines,
   output$get_country <- renderUI({
-    # countries <- get_selected_profile()$country
-    countries <- coffee_producting_countries
-    # primary_key_list <- filtered_orders_with_contacts()$primary_key
-    # print(primary_key_list) #does print list
-    # print(filtered_orders_with_contacts()) works
-    pickerInput("country", "Country", countries, width = '100%', selected = NULL)
+    countries <- get_profile_database()$country %>% unique()
+    pickerInput("selected_country", "Country", countries, width = '100%', selected = NULL)
   })
-  output$get_roast_machine <- renderUI({
-    machines <- coffee_producting_countries %>% sort()
-    pickerInput("roast_machine", "Machine", coffee_roasting_machines, width = '100%', selected = NULL)
-  })
+  # output$get_roast_machine <- renderUI({
+  #   machines <- coffee_producting_countries %>% sort()
+  #   pickerInput("roast_machine", "Machine", coffee_roasting_machines, width = '100%', selected = NULL)
+  # })
   output$get_processing_method <- renderUI({
-    method <- processing_methods %>% sort()
-    pickerInput("processing_method", "Processing method", method, width = '100%', selected = NULL)
+    method <- get_profile_database()$processing_method %>% unique()
+    pickerInput("selected_processing_method", "Processing method", method, width = '100%', selected = NULL)
   })
-  output$get_variety <- renderUI({
-    varieties <- coffee_varieties_arabica %>% sort()
-    pickerInput("variety", "Variety", varieties, width = '100%', selected = NULL)
-  })
+  # output$get_variety <- renderUI({
+  #   varieties <- get_profile_database()$date_uploaded %>% unique()
+  #   pickerInput("variety", "Variety", varieties, width = '100%', selected = NULL)
+  # })
+
+  # get text from roast update tab
+  output$value <- renderPrint(input$roast_machine)
   #  -------------- Input Roast Data from file/user --------------------
 
   # Define fields we want to save on the form, this is based on the textInput IDs
-  fields_to_update_for_contacts <-
-    c(  "roast_date",
+  fields_to_update_for_profile <-
+    c(
         # "primary_key",
         # "name",
-        "weight_before",
-        "weight_after",
-        # unit_of_measure
         "roast_machine",
         "roast_farm",
         "country",
         "region",
         "quality",
         "processing_method",
-        # "variety",
-        "roast_notes")
+        "roast_notes"
+        )
 
   # Collect the form data and save it into the "data" list variable
   form_data_contact_db <- reactive({
     # print( input[[contact_register_fields[1]]]) # works
-
-    data <- sapply(fields_to_update_for_contacts, function(x) input[[x]] ) # fields contains all values we want to save, gather all the values based on input
+    data <- sapply(fields_to_update_for_profile, function(x) input[[x]] ) # fields contains all values we want to save, gather all the values based on input
     data <- Filter(function(x) !(all(x == "" | x == 0)), data) # take out 0 or empty values
     data
   })
 
-  # This check to see if uploaded profile is valid, returns booleon
+  # This checks to see if uploaded profile is valid, returns booleon
   valid_profile_upload <- reactive({
     if (any(c(
       length(input$roast_curves_upload$datapath) != 0 &
@@ -377,21 +275,21 @@ app_server <- function( input, output, session ) {
   })
 
   # When submit button is pushed, save the form data - it doesn't change the data - just saves it ??
-  observeEvent(input$update_record, {
+  observeEvent(input$save_record, {
 
     # After button is pushed, check for these validations, if not satisfied a message will pop
-    feedbackWarning(
-      "weight_before",
-      !is.numeric(input$weight_before) |
-        input$weight_before <= 0,
-      "Enter valid number"
-    )
-    feedbackWarning(
-      "weight_after",
-      !is.numeric(input$weight_after) |
-        input$weight_after <= 0,
-      "Enter valid number"
-    )
+    # feedbackWarning(
+    #   "weight_before",
+    #   !is.numeric(input$weight_before) |
+    #     input$weight_before <= 0,
+    #   "Enter valid number"
+    # )
+    # feedbackWarning(
+    #   "weight_after",
+    #   !is.numeric(input$weight_after) |
+    #     input$weight_after <= 0,
+    #   "Enter valid number"
+    # )
 
     feedbackWarning("variety", is.null(input$variety), "Enter variety")
 
@@ -407,8 +305,8 @@ app_server <- function( input, output, session ) {
 
     # And then require these to be valid. If they are all valid, code will finally proceed.
     req(
-      is.numeric(input$weight_before) & input$weight_before > 0,
-      is.numeric(input$weight_after) & input$weight_after > 0,
+      # is.numeric(input$weight_before) & input$weight_before > 0,
+      # is.numeric(input$weight_after) & input$weight_after > 0,
       !is.null(input$variety),
       is_file_valid
     )
@@ -420,17 +318,21 @@ app_server <- function( input, output, session ) {
     # Convert opened JSON into R format :)
     profile_as_json <- jsonlite::fromJSON(opened_json)
     # print(profile_as_json) works
-    # Get the filename as where it is saved so we can save and store filename
-    # Returns filename (i.e. data/filename.json)
+    # Get the filename so we can save and store filename
+    # Returns filename (i.e.filename.json)
     saved_filename <- get_profile_filename(profile_as_json,
                                            country = input$country,
                                            region = input$region)
 
     # Saves opened JSON profile in the folder. Cannot be an R object.
-    write(opened_json, saved_filename)
+    tosave <- jsonlite::toJSON(opened_json)
+    write(tosave, paste0("data-raw/saved/",saved_filename))
 
     # Make the filename list so we can append to all_inputs_to_save
     save_filename_list <- c("filename" = saved_filename) %>% as.list()
+
+    # Get date of upload
+    save_upload_date <- c("date_uploaded" = as.character(Sys.Date())) %>% as.list()
 
     # Variety is saved as a list, must convert to a string and put string into a list to save to db
     variety_as_char <-
@@ -438,9 +340,9 @@ app_server <- function( input, output, session ) {
     save_variety <- c("variety" = variety_as_char) %>% as.list()
 
     # Combine variety and filename to all inputs (which form_data_contact_db runs) in order to dump them in db under 1 sql query
-    # These all must be in fields_to_update_for_contacts in order to save
+    # These all must be in fields_to_update_for_profile in order to save
     all_inputs_to_save <-
-      unlist(c(save_variety, save_filename_list, form_data_contact_db()))
+      unlist(c(save_upload_date, save_variety, save_filename_list, form_data_contact_db()))
 
     # Then save all the inputs!
     record_status <-
@@ -454,23 +356,28 @@ app_server <- function( input, output, session ) {
   })
 
   # When the new button is pushed, need session object so clear out fields
-  update_profile_fields <- function(profile_data) {
-    profile <- profile_data
-  }
+  # update_profile_fields <- function(profile_data) {
+  #   profile <- profile_data
+  # }
 
-  output$uploaded_data_preview <- renderFormattable({
-    if (valid_profile_upload()){
-      opened_json <- open_profile_as_json(alog_input = input$roast_curves_upload$datapath)
+  output$uploaded_data_preview <- function() {
+    if (valid_profile_upload()) {
+      opened_json <-
+        open_profile_as_json(alog_input = input$roast_curves_upload$datapath)
       # message(input$roast_curves_upload$datapath)
 
       # Convert opened JSON into R format :)
-      profile_as_json <- jsonlite::fromJSON(opened_json)
-      x <- profile_as_json$timex %>% as.data.frame() %>% head()
+      profile_as_json <-
+        jsonlite::fromJSON(opened_json)
+      # x <- profile_as_json$timex %>% as.data.frame() %>% head()
       # print(x)
-      formattable(x)
+      get_data_to_display_at_upload(profile_as_json) %>%
+        tidyr::pivot_longer(cols = 1:7, values_to = "data") %>%
+        kableExtra::kbl(col.names = c("", ""), align = "l", centering = FALSE) %>%
+        kableExtra::kable_minimal()
+      # formattable(x)
     } else{
       return(NULL)
     }
-  })
-
+  }
 }

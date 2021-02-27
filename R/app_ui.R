@@ -16,12 +16,8 @@ app_ui <- function(request) {
       tabPanel(
         "Roast profiles",
         sidebarLayout(
-          column(width = 2,
-                 sidebarPanel(width = NULL,
-                              radioButtons(
-                                "plotType", "Plot type",
-                                c("Scatter" = "p", "Line" = "l")
-                              )),
+          column(width = 4,
+                 sidebarPanel(htmlOutput("get_filenames_saved")),
                  sidebarPanel(width = NULL,
                               formattableOutput("roasting_profile_data")
 
@@ -36,6 +32,10 @@ app_ui <- function(request) {
         )
       ),
       #  -------------- Tasting Tab --------------------
+      # Dropdowns
+      # htmlOutput("get_data_upload_date"),
+      # htmlOutput("get_country"),
+      # htmlOutput("get_processing_method")
       tabPanel("Tasting",
                fluidRow(
                  column(
@@ -54,16 +54,16 @@ app_ui <- function(request) {
         "Import Data",
         shinydashboard::box(
           titlePanel("Input Profile"),
-            width = 8,
+            width = 6,
             style = "text-align:justify;color:black;background-color:rgb(245,245,245);padding:15px;border-radius:10px",
-            fluidRow(
-              column(3, shiny::dateInput("roast_date", "Roast date", value = Sys.Date(), format = "M d, yyyy", autoclose=TRUE)),
+            # fluidRow(
+              # column(3, shiny::dateInput("roast_date", "Roast date", value = Sys.Date(), format = "M d, yyyy", autoclose=TRUE)),
               # input sys date
-              column(3, textInput("name", "Your name")),
-              column(2, numericInput("weight_before", "Weight before", value = NA)),
-              column(2, numericInput("weight_after", "Weight after", value = NA)),
-              column(2, pickerInput("unit_of_measure", "Units", choices = units_of_measures, options = pickerOptions())),
-            ),
+              # column(3, textInput("name", "Your name")),
+              # column(2, numericInput("weight_before", "Weight before", value = NA)),
+              # column(2, numericInput("weight_after", "Weight after", value = NA)),
+              # column(2, pickerInput("unit_of_measure", "Units", choices = units_of_measures, options = pickerOptions()))
+            # ),
             fluidRow(
               column(3, pickerInput("roast_machine", "Roast machine", choices = coffee_roasting_machines)),
               column(3, textInput("roast_farm", "Farm")),
@@ -78,11 +78,15 @@ app_ui <- function(request) {
 
             ), # https://mastering-shiny.org/action-transfer.html
             fluidRow(shiny::fileInput(inputId = 'roast_curves_upload', 'Upload Artisan (.alog)', accept = '.alog'),
-                     actionButton("update_record", "Submit", class = "btn-primary")
-            ),
-            formattableOutput("uploaded_data_preview")
-        )
-      )
+                     actionButton("save_record", "Submit profile data", class = "btn-primary")
+            )),
+        shinydashboard::box(
+            # formattableOutput("uploaded_data_preview")
+          titlePanel("Summary of uploaded profile"),
+          width = 6, style = "text-align:justify;color:black;background-color:rgb(245,245,245);padding:15px;border-radius:10px",
+        tableOutput("uploaded_data_preview")
+        ))
+
       #  -------------- More Tabs -dropdown --------------------
       # navbarMenu(
       #     "More",
