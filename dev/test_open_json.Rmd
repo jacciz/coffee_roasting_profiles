@@ -5,8 +5,8 @@ output: html_notebook
 
 ```{r}
 
-alog_input = "C:/W_shortcut/coffeeroastingprofiles/data-raw/21-02-17_1840_ZambiaKasama_1stcrack.alog"
-alog_input = "C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/21-02-17_1840_ZambiaKasama_1stcrack.alog"
+# alog_input = "C:/W_shortcut/coffeeroastingprofiles/data-raw/21-02-17_1840_ZambiaKasama_1stcrack.alog"
+# alog_input = "C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/21-02-17_1840_ZambiaKasama_1stcrack.alog"
 alog_input = "C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/21-02-09_2015_Haiti_Baptiste.alog"
 ```
 

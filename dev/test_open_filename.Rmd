@@ -16,17 +16,18 @@ filename <-
 ```
 ```{r}
 get_data_to_display_at_upload(filename)
-
-get_special_event_times(filename)
+get_special_event_times(filename) 
 get_data_of_times_temps(filename) 
 get_event_times(filename)
-
-get_data_of_phase_times(filename)
 ```
 ```{r put data in chart}
-times <- get_data_of_times_temps(filename) %>% dplyr::mutate_if(is.character, as.numeric)# 
+times <-
+  get_data_of_times_temps(filename) %>%
+  dplyr::mutate_if(is.character, as.numeric)#
 special_times <- get_special_event_times(filename)
-event_times <- get_event_times(filename)  %>% dplyr::mutate_if(is.character, as.numeric)
+event_times <-
+  get_event_times(filename) %>%
+  dplyr::mutate_if(is.character, as.numeric)
 
     # Get data for certain parameters for chart
     time_zero = lubridate::as_datetime("1970-01-01 00:00:00 UTC")
@@ -37,8 +38,6 @@ event_times <- get_event_times(filename)  %>% dplyr::mutate_if(is.character, as.
     second_crack_start = lubridate::as_datetime(event_times$sc_time_start)
     drop_time = lubridate::as_datetime(event_times$drop_time)
     max_temp = 500 # Highest temp in chart
-times %>% dplyr::mutate(delta = diff(BT, lag = 1))
-Delta T = (changeTemp/ChangeTime)*60. =  degress per minute ??
 plotly::plot_ly(
   # BT Line
   times,
@@ -126,7 +125,7 @@ plotly::add_segments(
       color = '#AAAAAA',
       width = 2
     ),
-    text = "FC start"
+    text = "FC end"
   ) %>%
   # For second_crash_start
   # add_segments( x = ~first_crack_start, xend = ~first_crack_start, y =~ 0, yend=~500,
