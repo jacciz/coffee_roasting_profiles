@@ -6,7 +6,7 @@
 #' @export
 get_data_to_display_at_upload <- function(json_file) {
   weight_loss_var = ifelse(is.null(json_file[["computed"]][["weight_loss"]]), 0, json_file[["computed"]][["weight_loss"]])
-  tibble(
+  tibble::tibble(
     "Roast date: " = json_file[["roastisodate"]],
     "Roast time: " = json_file[["roasttime"]],
     "Weight before: " = as.character(json_file[["computed"]][["weightin"]]),
@@ -20,11 +20,10 @@ get_data_to_display_at_upload <- function(json_file) {
 #' Get special events and times
 #'
 #' @inheritParams get_data_to_display_at_upload
-#' @noRd
 #' @export
 get_special_event_times <- function(json_file) {
-  tibble(time_of_event = json_file[["specialevents"]],
-         type_of_event = json_file[["specialeventsStrings"]])
+  tibble::tibble(time_of_event = as.character(json_file[["specialevents"]]),
+         type_of_event = as.character(json_file[["specialeventsStrings"]]))
 }
 
 #' Get times and temps for graph
@@ -34,9 +33,9 @@ get_special_event_times <- function(json_file) {
 #' @noRd
 #' @export
 get_data_of_times_temps <- function(json_file) {
-  tibble(time = json_file[["timex"]],
-         BT = json_file[["temp1"]],
-         ET = json_file[["temp2"]])
+  tibble::tibble(time = as.character(json_file[["timex"]]),
+         BT = as.character(json_file[["temp1"]]),
+         ET = as.character(json_file[["temp2"]]))
 }
 
 #' Get tp, dry, fc, sc, drop times
@@ -46,7 +45,7 @@ get_data_of_times_temps <- function(json_file) {
 #' @noRd
 #' @export
 get_event_times <- function(json_file) {
-  tibble(
+  tibble::tibble(
     tp_time = json_file[["computed"]][["TP_time"]],
     dry_time = json_file[["computed"]][["DRY_time"]],
     fc_time_start = ifelse(is.null(json_file[["computed"]][["FCs_time"]]), 0, json_file[["computed"]][["FCs_time"]]),
@@ -64,7 +63,7 @@ get_event_times <- function(json_file) {
 #' @noRd
 #' @export
 get_data_of_phase_times <- function(json_file) {
-  tibble(
+  tibble::tibble(
     dryphase = json_file[["computed"]][["dryphasetime"]],
     midphase = json_file[["computed"]][["midphasetime"]],
     developphase = json_file[["computed"]][["finishphasetime"]]

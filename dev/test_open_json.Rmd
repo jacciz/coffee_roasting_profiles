@@ -4,9 +4,10 @@ output: html_notebook
 ---
 
 ```{r}
+
 alog_input = "C:/W_shortcut/coffeeroastingprofiles/data-raw/21-02-17_1840_ZambiaKasama_1stcrack.alog"
 alog_input = "C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/21-02-17_1840_ZambiaKasama_1stcrack.alog"
-alog_input = "C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/21-02-25_1709_DR_RedHoney.alog"
+alog_input = "C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/21-02-09_2015_Haiti_Baptiste.alog"
 ```
 
 ```{r open alog}
@@ -19,8 +20,13 @@ alog_input = "C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/
     sub <- gsub("False", '\"False\"', sub)
     
     profile_as_json <- jsonlite::fromJSON(sub)
+    # y <- jsonlite::fromJSON(sub, flatten =TRUE, simplifyDataFrame = TRUE)
+    # wont save as JSON??
 # jsonlite::toJSON(sub)
     # profile_as_json[["timex %>% as.data.frame()
+    x <- jsonlite::toJSON(profile_as_json) # works! but more branches
+    write(x, paste0("C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/saved/","test_haiti.json"))
+    jsonlite::toJSON(sub) # doesnt work
 ```
 ```{r}
 # these were copied into fct_upload_json_data
@@ -71,7 +77,7 @@ get_data_to_display_at_upload <- function(json_file) {
     )
 }
 get_special_event_times(profile_as_json)
-get_data_of_times_temps(profile_as_json)
+x <- get_data_of_times_temps(profile_as_json)
 get_event_times(profile_as_json)
 get_data_of_phase_times(profile_as_json)
 get_data_to_display_at_upload(profile_as_json)    
@@ -86,3 +92,8 @@ get_data_to_display_at_upload(profile_as_json) %>% pivot_longer(cols = 1:7, valu
         col.names = c("", ""), align = "l", centering = FALSE
     ) %>%  kableExtra::kable_minimal()
     ```
+```{r}
+2:30 219.5 deg line 14210
+90 sec
+Delta T = (changeTemp/ChangeTime)*60. =  degress per minute 
+```

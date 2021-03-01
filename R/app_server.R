@@ -51,7 +51,7 @@ app_server <- function( input, output, session ) {
   # })
 
   #  -------------- The Roast Profile Analysis Line Chart --------------------
-  # mod_chart_roasting_profile_server("roast_profile_chart", open_profile_by_filename())
+  mod_chart_roasting_profile_server("roast_profile_chart", haiti) # open_profile_by_filename()
   # output$summary_profile_data <- function(){
   #
   # }
@@ -325,7 +325,8 @@ app_server <- function( input, output, session ) {
                                            region = input$region)
 
     # Saves opened JSON profile in the folder. Cannot be an R object.
-    tosave <- jsonlite::toJSON(opened_json)
+    tosave <- jsonlite::toJSON(profile_as_json)
+
     write(tosave, paste0("data-raw/saved/",saved_filename))
 
     # Make the filename list so we can append to all_inputs_to_save

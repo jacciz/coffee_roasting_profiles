@@ -9,9 +9,8 @@ Try executing this chunk by clicking the *Run* button within the chunk or by pla
 
 ```{r}
 library(magrittr)
-libr
 filename <-
-  jsonlite::read_json("C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/saved/Angola--2021-02-25-17-09-27.json")
+  jsonlite::read_json("C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/saved/Haiti--2021-02-09-20-15-17.json")
 # filename2 <-
 # jsonlite::toJSON("C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/saved/Angola--2021-02-26-16-16-22.json")
 ```
@@ -38,8 +37,8 @@ event_times <- get_event_times(filename)  %>% dplyr::mutate_if(is.character, as.
     second_crack_start = lubridate::as_datetime(event_times$sc_time_start)
     drop_time = lubridate::as_datetime(event_times$drop_time)
     max_temp = 500 # Highest temp in chart
-
-
+times %>% dplyr::mutate(delta = diff(BT, lag = 1))
+Delta T = (changeTemp/ChangeTime)*60. =  degress per minute ??
 plotly::plot_ly(
   # BT Line
   times,
