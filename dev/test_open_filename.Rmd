@@ -15,29 +15,44 @@ filename <-
 # jsonlite::toJSON("C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/saved/Angola--2021-02-26-16-16-22.json")
 ```
 ```{r}
+# These are in fct_upload_json_data
 get_data_to_display_at_upload(filename)
 get_special_event_times(filename) 
 get_data_of_times_temps(filename) 
 get_event_times(filename)
 ```
 ```{r put data in chart}
+# Time with BT and ET
+
 times <-
   get_data_of_times_temps(filename) %>%
-  dplyr::mutate_if(is.character, as.numeric)#
+  dplyr::mutate_if(is.character, as.numeric)
 special_times <- get_special_event_times(filename)
 event_times <-
   get_event_times(filename) %>%
   dplyr::mutate_if(is.character, as.numeric)
 
-    # Get data for certain parameters for chart
-    time_zero = lubridate::as_datetime("1970-01-01 00:00:00 UTC")
-    # time_max = max(as_datetime(profile$Time2), na.rm = TRUE)
-    dry_end = lubridate::as_datetime(event_times$dry_time)
-    first_crack_start = lubridate::as_datetime(event_times$fc_time_start)
-    first_crack_end = lubridate::as_datetime(event_times$fc_time_end)
-    second_crack_start = lubridate::as_datetime(event_times$sc_time_start)
-    drop_time = lubridate::as_datetime(event_times$drop_time)
-    max_temp = 500 # Highest temp in chart
+# Get data for parameters for charts
+time_zero = lubridate::as_datetime("1970-01-01 00:00:00 UTC")
+# time_max = max(as_datetime(profile$Time2), na.rm = TRUE)
+dry_end = lubridate::as_datetime(event_times$dry_time)
+first_crack_start = lubridate::as_datetime(event_times$fc_time_start)
+first_crack_end = lubridate::as_datetime(event_times$fc_time_end)
+second_crack_start = lubridate::as_datetime(event_times$sc_time_start)
+drop_time = lubridate::as_datetime(event_times$drop_time)
+max_temp = 500 # Highest temp in chart
+
+add_times_to_delta <-
+  function(cleaned_deltas,
+           tp_index = as.integer(filename$computed$TP_idx),
+           time_list = times$time) {
+    # tp_index = as.integer(filename$computed$TP_idx)
+    time_list = times$time # 472
+    cleaned_deltas %>% dplyr::slice(tp_index:dplyr::n()) %>% dplyr::mutate(timex = time_list)
+  }
+
+# Deltas ready to be plotted
+deltas_clean = add_times_to_delta(clean)
 plotly::plot_ly(
   # BT Line
   times,
@@ -146,6 +161,24 @@ plotly::add_segments(
     ),
     text = "FC start"
   ) %>%
+   plotly::add_trace(
+     data = deltas_clean,        # Change BT Line
+        mode = 'lines',
+        x = ~ lubridate::as_datetime(timex),
+        y = ~ dtemp1,
+        line = list(color = "#428BCA"),
+        name = "\u0394BT",
+        yaxis = "y2"
+      ) %>% 
+     plotly::add_trace(
+     data = deltas_clean,        # Change ET Line
+        mode = 'lines',
+        x = ~ lubridate::as_datetime(timex),
+        y = ~ dtemp2,
+        line = list(color = "yellow"),
+        name = "\u0394ET",
+        yaxis = "y2"
+      ) %>% 
   plotly::layout(
     # The right side y-axis
     yaxis2 = list(
@@ -220,6 +253,32 @@ as.numeric(times$time)%/%60  +  as.numeric(times$time)%%60 /3600
       showlegend = FALSE,
       name = "BT"
     ) %>% plotly::layout(xaxis = list(tickformat = "%M:%S"))
+```
+```{r}
+plotly::plot_ly(
+  # BT Line
+  times,
+  type = 'scatter',
+  mode = 'lines',
+  x = ~ lubridate::as_datetime(time),
+  line = list(color = "#4DB848"),
+  # x = ~seq(ms("00:00"), ms("10:10")),
+  # x = ~ lubridate::ms(Time2),
+  # x = ~ lubridate::as_datetime(Time1),
+  y = ~ BT,
+  # hovertemplate = paste('%{y: .1f}\u00b0F', '<br>%{x}<br>'),
+  hovertemplate = '%{y: .1f}\u00b0F',
+  showlegend = FALSE,
+  name = "BT"
+) %>%
+   plotly::add_trace(data = deltas_clean,        # Change BT Line
+        mode = 'lines',
+        x = ~ lubridate::as_datetime(timex),
+        y = ~ dtemp1,
+        line = list(color = "#428BCA"),
+        name = "\u0394BT",
+        yaxis = "y2"
+      ) 
 ```
 
 

@@ -92,8 +92,3 @@ get_data_to_display_at_upload(profile_as_json) %>% pivot_longer(cols = 1:7, valu
         col.names = c("", ""), align = "l", centering = FALSE
     ) %>%  kableExtra::kable_minimal()
     ```
-```{r}
-2:30 219.5 deg line 14210
-90 sec
-Delta T = (changeTemp/ChangeTime)*60. =  degress per minute 
-```

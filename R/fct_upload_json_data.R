@@ -17,7 +17,7 @@ get_data_to_display_at_upload <- function(json_file) {
   )
 }
 
-#' Get special events and times
+#' Get special events and times. Subract TP_idx from all times.
 #'
 #' @inheritParams get_data_to_display_at_upload
 #' @export
@@ -25,7 +25,7 @@ get_special_event_times <- function(json_file) {
   time_index = as.numeric(json_file[["computed"]][["TP_idx"]][[1]]) # When charge time starts
   tib <- tibble::tibble(time_of_event = as.numeric(json_file[["specialevents"]]),
          type_of_event = as.character(json_file[["specialeventsStrings"]]))
-  tib %>% mutate(time_of_event = time_of_event - time_index) %>% filter(time_of_event > 0)
+  tib %>% dplyr::mutate(time_of_event = time_of_event - time_index) %>% dplyr::filter(time_of_event > 0)
 }
 
 #' Get times and temps for graph
@@ -39,7 +39,7 @@ get_data_of_times_temps <- function(json_file) {
   tib <- tibble::tibble(time = as.numeric(json_file[["timex"]]),
          ET = as.character(json_file[["temp1"]]),
          BT = as.character(json_file[["temp2"]]))
-  tib %>% mutate(time = time - time_index) %>% filter(time > 0)
+  tib %>% dplyr::mutate(time = time - time_index) %>% dplyr::filter(time > 0)
 }
 
 #' Get tp, dry, fc, sc, drop times

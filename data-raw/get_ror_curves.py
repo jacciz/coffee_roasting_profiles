@@ -1,26 +1,27 @@
-import sys
-import os
-import jsonpickle
+# import sys
+# import os
+
+# import jsonpickle
 import json
-import string
-import csv
+# import string
+# import csv
 from pandas import json_normalize
 import pandas as pd
 import numpy
 from scipy.signal import savgol_filter
 #numpy.float64
 #pd.DataFrame
-with open('C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/saved/Haiti--2021-02-09-20-15-17.json') as f:
-  data = json.load(f)
+# with open('C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/saved/Haiti--2021-02-09-20-15-17.json') as f:
+  # data = json.load(f)
 # Output: {'name': 'Bob', 'languages': ['English', 'Fench']}
 #print(data)
-filename = 'C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/saved/Haiti--2021-02-09-20-15-17.json'
+# filename = 'C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/saved/Haiti--2021-02-09-20-15-17.json'
 
-def import_games_json(filename = filename): #import raw tweets and outputs a df with selected columns
-    with open(filename, 'r', encoding='utf-8') as tweet_data:
+def import_games_json(file): #import json and outputs a df with selected columns
+    with open(file, 'r', encoding='utf-8') as tweet_data:
       games_tweet = [json.loads(line) for line in tweet_data.readlines()]
       game_df = json_normalize(games_tweet)
-    game_df_selected = game_df[['timex', 'temp1', 'temp2']]
+    game_df_selected = game_df[['timex', 'temp1', 'temp2', 'timeindex']]
     return game_df_selected
 # print(import_games_json()["temp2"][0])
 # print(len(data["timex"]))
@@ -30,37 +31,13 @@ def import_games_json(filename = filename): #import raw tweets and outputs a df 
 # t1 = game_tweets['temp1']
 # t2 = game_tweets['temp2']
 
-tuple(import_games_json()["temp2"][0])
+# tuple(import_games_json()["temp2"][0])
 
 
-
-# mylist = []
-# for x in range(0,len(import_games_json()["temp2"][0])):
-#     mylist.append(import_games_json()["temp2"][x])
-# timex = tuple(mylist)
-# print (timex)
-# 
-# 
-# mylist = []
-# for x in range(0,len(data["timex"])):
-#     mylist.append(data['timex'][x])
-# timex = tuple(mylist)
-# #print (mytuple)
-# 
-# mylist = []
-# for x in range(0,455):
-#     mylist.append(data['temp1'][x])
-# t1 = tuple(mylist)
-# 
-# mylist = []
-# for x in range(0,455):
-#     mylist.append(data['temp2'][x])
-# t2 = tuple(mylist)
-#print(pd.DataFrame(game_tweets['temp1']))
-DROPidx = len(data["timex"])
-timex = tuple(import_games_json()["timex"][0])
-t1 = tuple(import_games_json()["temp1"][0])
-t2 = tuple(import_games_json()["temp2"][0])
+# DROPidx = len(import_games_json()["timex"][0])
+# timex = tuple(import_games_json()["timex"][0])
+# t1 = tuple(import_games_json()["temp1"][0])
+# t2 = tuple(import_games_json()["temp2"][0])
 
     # computes the RoR over the time and temperature arrays tx and temp via polynoms of degree 1 at index i using a window of wsize
     # the window size wsize needs to be at least 2 (two succeeding readings)
@@ -200,7 +177,7 @@ def smooth_list(a, b, window_len = 7, window='hanning',decay_weights=None,decay_
     # computes the RoR deltas and returns the smoothed versions for both temperature channels
     # if t1 or t2 is not given (None), its RoR signal is not computed and None is returned instead
     # timex_lin: a linear spaced version of timex
-def recomputeDeltas(timex=timex,CHARGEidx = 1,DROPidx = DROPidx,t1 = t1,t2=t2,optimalSmoothing=False,timex_lin=None,deltaETsamples=None,deltaBTsamples=None):
+def recomputeDeltas(timex,CHARGEidx,DROPidx,t1,t2,optimalSmoothing=False,timex_lin=None,deltaETsamples=None,deltaBTsamples=None):
     polyfitRoRcalc = False # RIGHT? should be false, Look at artisan.settings
     # RoR display limits - (RoR FILTER PART)
     # user configurable RoR limits (only applied if flag is True; applied before TP during recording as well as full redraw)
@@ -389,7 +366,7 @@ def recomputeDeltas(timex=timex,CHARGEidx = 1,DROPidx = DROPidx,t1 = t1,t2=t2,op
                 delta2 = delta2.tolist()
         else:
             delta2 = None
-
+        
         return delta1, delta2
     except Exception as e:
 #            import traceback
@@ -398,10 +375,24 @@ def recomputeDeltas(timex=timex,CHARGEidx = 1,DROPidx = DROPidx,t1 = t1,t2=t2,op
         #aw.qmc.adderror((QApplication.translate("Error Message","Exception:",None) + " recomputeDeltas() {0}").format(str(e)),exc_tb.tb_lineno)
         return [0]*len(timex),[0]*len(timex)
 
-print(recomputeDeltas())
-df = recomputeDeltas()
+# print(recomputeDeltas())
+# df = recomputeDeltas()
 
-with open('C:/Users/jacci/Documents/DS 710/test_haiti.csv', 'w') as f:
-    writer = csv.writer(f , lineterminator='\n')
-    for tup in df:
-        writer.writerow(tup)
+# with open('C:/Users/jacci/Documents/DS 710/test_haiti.csv', 'w') as f:
+#     writer = csv.writer(f , lineterminator='\n')
+#     for tup in df:
+#         writer.writerow(tup)
+
+# doesnt read correctly if read df from R
+def get_ror_curves(file_raw):
+  df = import_games_json(file_raw)
+  # df = file_raw
+  # TP_idx DROP_time
+  CHARGEidx = df["timeindex"][0][0]  # or do max and min??
+  DROPidx = max(df["timeindex"][0]) # df["timeindex"][0][3] #491 ??
+  timex = tuple(df["timex"][0]) #  ( - time_idx??)
+  t1 = tuple(df["temp1"][0]) # very low temps?? 383.954
+  t2 = tuple(df["temp2"][0]) # ??
+  deltas = recomputeDeltas(timex=timex,CHARGEidx = CHARGEidx,DROPidx = DROPidx,t1 = t1,t2=t2)
+  df = pd.DataFrame(deltas)
+  return(df)
