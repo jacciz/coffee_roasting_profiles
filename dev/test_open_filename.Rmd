@@ -9,16 +9,17 @@ Try executing this chunk by clicking the *Run* button within the chunk or by pla
 
 ```{r}
 library(magrittr)
-filename <-
-  jsonlite::read_json("C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/saved/Haiti--2021-02-09-20-15-17.json")
+filename <- # 1-394 = 393
+  jsonlite::read_json("C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/saved/Dominican Republic--2021-02-25-17-09-27.json")
 # filename2 <-
 # jsonlite::toJSON("C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/saved/Angola--2021-02-26-16-16-22.json")
 ```
 ```{r}
+# python has 455
 # These are in fct_upload_json_data
 get_data_to_display_at_upload(filename)
 get_special_event_times(filename) 
-get_data_of_times_temps(filename) 
+get_data_of_times_temps(filename)
 get_event_times(filename)
 ```
 ```{r put data in chart}
@@ -78,30 +79,20 @@ plotly::plot_ly(
     line = list(color = "#D50032"),
     name = "ET"
   ) %>%
-  # add_trace(        # Change BT Line
-  #   mode = 'lines',
-  #   x = ~ lubridate::as_datetime(Time2),
-  #   y = ~ change_BT,
-  #   line = list(color = "#428BCA"),
-  #   name = "\u0394BT",
-  #   yaxis = "y2"
-  # ) %>%
   plotly::layout(hovermode = "x unified") %>%
-  # filter(!is.na(Event),
-  #        !is.na(Time2),
-  #        Event != "Drop",
-  #        !grepl("^Charge", Event)) %>%
-plotly::add_annotations(
-  x =  ~lubridate::as_datetime(as.numeric(special_times$time_of_event)), # jitter() ?
-  y = ~ 400,
-  text = ~ special_times$type_of_event,
-  # yaxis = "y2",
-  textposition = "top center",
-  showarrow = FALSE,
-  # arrowhead = .5,
-  # arrowwidth = 1,
-  font = list(size = 12, color = "black")
-  # bgcolor = ~ event_color
+plotly::add_annotations( # Special events
+    data = special_times,
+    x =  ~ lubridate::as_datetime(as.numeric(time_of_event)),
+    # y = ~ jitter(400, 60),
+    y = ~ 500,
+    text = ~ type_of_event,
+    # yaxis = "y2",
+    textposition = "top center",
+    showarrow = FALSE,
+    # arrowhead = .5,
+    # arrowwidth = 1,
+    font = list(size = 12, color = "#ffffff"),
+    bgcolor = ~ color
 ) %>%                     # Add lines for phases
 plotly::add_segments(
   x = ~ dry_end,
@@ -114,7 +105,7 @@ plotly::add_segments(
     color = '#AAAAAA',
     width = 2
   ),
-  text = "Dry end"
+  name = "Dry end"
 ) %>%
   plotly::add_segments(
     x = ~ first_crack_start,
@@ -127,7 +118,7 @@ plotly::add_segments(
       color = '#AAAAAA',
       width = 2
     ),
-    text = "FC start"
+    name = "FC start"
   ) %>%
   plotly::add_segments(
     x = ~ first_crack_end,
@@ -140,14 +131,14 @@ plotly::add_segments(
       color = '#AAAAAA',
       width = 2
     ),
-    text = "FC end"
+    name = "FC end"
   ) %>%
   # For second_crash_start
   # add_segments( x = ~first_crack_start, xend = ~first_crack_start, y =~ 0, yend=~500,
   #               # opacity = 1,
   #               line = list(dash="dash",
   #                           color = 'gray80',
-  #                           width = 2), text = "FC start") %>%
+  #                           width = 2), name = "FC start") %>%
   plotly::add_segments(
     x = ~ drop_time,
     xend = ~ drop_time,
@@ -159,7 +150,7 @@ plotly::add_segments(
       color = '#AAAAAA',
       width = 2
     ),
-    text = "FC start"
+    name = "FC start"
   ) %>%
    plotly::add_trace(
      data = deltas_clean,        # Change BT Line
@@ -175,7 +166,7 @@ plotly::add_segments(
         mode = 'lines',
         x = ~ lubridate::as_datetime(timex),
         y = ~ dtemp2,
-        line = list(color = "yellow"),
+        line = list(color = "#3f0585"),
         name = "\u0394ET",
         yaxis = "y2"
       ) %>% 
@@ -254,7 +245,7 @@ as.numeric(times$time)%/%60  +  as.numeric(times$time)%%60 /3600
       name = "BT"
     ) %>% plotly::layout(xaxis = list(tickformat = "%M:%S"))
 ```
-```{r}
+```{r test}
 plotly::plot_ly(
   # BT Line
   times,
@@ -271,14 +262,21 @@ plotly::plot_ly(
   showlegend = FALSE,
   name = "BT"
 ) %>%
-   plotly::add_trace(data = deltas_clean,        # Change BT Line
-        mode = 'lines',
-        x = ~ lubridate::as_datetime(timex),
-        y = ~ dtemp1,
-        line = list(color = "#428BCA"),
-        name = "\u0394BT",
-        yaxis = "y2"
-      ) 
+  plotly::layout(hovermode = "x unified") %>%                  # Add lines for phases
+  plotly::add_segments(
+    x = ~ dry_end,
+    xend = ~ dry_end,
+    y =  ~ 0,
+    yend =  ~ max_temp,
+    # opacity = 1,
+    line = list(
+      dash = "dash",
+      color = '#AAAAAA',
+      width = 2
+    ),
+    name = "Dry end"
+    
+  )
 ```
 
 

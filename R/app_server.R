@@ -20,7 +20,7 @@ app_server <- function( input, output, session ) {
       })
   open_profile_by_filename <- # Based on country for now
     reactive({
-      pool::dbReadTable(pool, "roast_profiles") %>% filter(filename == nput$selected_filename)
+      pool::dbReadTable(pool, "roast_profiles") %>% filter(filename == input$selected_filename)
     })
 
 
@@ -49,11 +49,26 @@ app_server <- function( input, output, session ) {
   #         chart_analysis
   #     # }
   # })
-
+ rv <- reactiveValues(value_store = character())
+ # When input changes -> update
+ observeEvent(input$selected_filename, {
+   # output$selected_var <- renderText({
+   #   paste(input$selected_filename)
+   # })
+   # print(input$selected_filename) # WORKS
+   rv$value_store <- input$selected_filename
+   # print(rv$value_store) # works
+   # output$test <- renderText({
+   #   paste(rv$value_store)
+   # })
+ })
+ # x = reactive(rv$value_store)
   #  -------------- The Roast Profile Analysis Line Chart --------------------
-  mod_chart_roasting_profile_server("roast_profile_chart", haiti) # open_profile_by_filename()
+ observeEvent(input$selected_filename, {
+  mod_chart_roasting_profile_server("roast_profile_chart", input$selected_filename )# open_profile_by_filename()
+ })
   # output$summary_profile_data <- function(){
-  #
+  # input$uploaded_filenames is the filename
   # }
   output$roasting_profile_data <- renderFormattable({
 
@@ -208,14 +223,10 @@ app_server <- function( input, output, session ) {
 
   output$get_filenames_saved <- renderUI({
     uploaded_filenames <- get_profile_database()$filename #%>% rev()
-    # print(unique_key_list) #does print list
-    # print(filtered_orders_with_contacts()) works
     selectInput("selected_filename", "Choose file", uploaded_filenames, width = '100%', selected = NULL)
   })
   output$get_data_upload_date <- renderUI({
     unique_upload_dates <- get_profile_database()$date_uploaded %>% unique()
-    # print(unique_key_list) #does print list
-    # print(filtered_orders_with_contacts()) works
     selectInput("selected_upload_date", "Upload date", unique_upload_dates, width = '100%', selected = NULL)
   })
   # Make dropdown menu of all countries, roast machines,

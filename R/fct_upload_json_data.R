@@ -23,9 +23,14 @@ get_data_to_display_at_upload <- function(json_file) {
 #' @export
 get_special_event_times <- function(json_file) {
   time_index = as.numeric(json_file[["computed"]][["TP_idx"]][[1]]) # When charge time starts
-  tib <- tibble::tibble(time_of_event = as.numeric(json_file[["specialevents"]]),
-         type_of_event = as.character(json_file[["specialeventsStrings"]]))
-  tib %>% dplyr::mutate(time_of_event = time_of_event - time_index) %>% dplyr::filter(time_of_event > 0)
+  # drop_ index = json_file[["computed"]][["DROP_time"]][[1]]
+  tib <-
+    tibble::tibble(time_of_event = as.numeric(json_file[["specialevents"]]),
+                   type_of_event = as.character(json_file[["specialeventsStrings"]]))
+  tib %>%
+    dplyr::mutate(time_of_event = time_of_event - time_index) %>%
+    dplyr::filter(time_of_event > 0) %>%
+    dplyr::mutate(color = ifelse(grepl("^Fan", type_of_event), "#0f1fff", "#ff0f0f"))
 }
 
 #' Get times and temps for graph
@@ -68,9 +73,9 @@ get_event_times <- function(json_file) {
 #' @export
 get_data_of_phase_times <- function(json_file) {
   tibble::tibble(
-    dryphase = json_file[["computed"]][["dryphasetime"]],
-    midphase = json_file[["computed"]][["midphasetime"]],
-    developphase = json_file[["computed"]][["finishphasetime"]]
+    dryphase = as.integer(json_file[["computed"]][["dryphasetime"]]),
+    midphase = as.integer(json_file[["computed"]][["midphasetime"]]),
+    developphase = as.integer(json_file[["computed"]][["finishphasetime"]])
   )
 }
 

@@ -12,7 +12,7 @@ library(reticulate)
 # json <-
   # jsonlite::read_json("../data-raw/saved/Dominican Republic--2021-02-25-17-09-27.json")
 json <-
-  jsonlite::read_json("../data-raw/saved/Haiti--2021-02-09-20-15-17.json")
+  jsonlite::read_json("../data-raw/saved/Dominican Republic--2021-02-25-17-09-27.json")
 ```
 
 
@@ -33,11 +33,11 @@ json <-
 ```{r}
 
 # Bring python script into R
-source_python("../data-raw/get_ror_curves.py")
+reticulate::source_python("../data-raw/get_ror_curves.py")
 # reticulate::repl_python("../data-raw/get_ror_curves.py")
 # reticulate::py_run_file("../data-raw/get_ror_curves.py")
 #WORKS!!
-all = py$get_ror_curves(file_raw ='../data-raw/saved/Haiti--2021-02-09-20-15-17.json' )
+all = py$get_ror_curves(file_raw ='../data-raw/saved/Dominican Republic--2021-02-25-17-09-27.json' )
 # json$timex %>% length() verify same length
 # py$get_ror_curves('C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/saved/Haiti--2021-02-09-20-15-17.json')
 
@@ -60,7 +60,7 @@ clean_deltas_from_python <- function(raw_deltas) {
 ```
 ```{r}
 # deltas_take_away_charge_time
-clean 
+clean  = clean_deltas_from_python(all)
 ```
 
 ```{r}

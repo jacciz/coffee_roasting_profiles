@@ -2,10 +2,10 @@
 % Please edit documentation in R/fct_upload_json_data.R
 \name{get_special_event_times}
 \alias{get_special_event_times}
-\title{Get special events and times}
+\title{Get special events and times. Subract TP_idx from all times.}
 \usage{
 get_special_event_times(json_file)
 }
 \description{
-Get special events and times
+Get special events and times. Subract TP_idx from all times.
 }

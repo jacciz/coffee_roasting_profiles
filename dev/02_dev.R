@@ -24,7 +24,7 @@ golem::add_module( name = "name_of_module2" ) # Name of the module
 
 ## Add helper functions ----
 ## Creates ftc_* and utils_*
-golem::add_fct( "upload_json_data" )
+golem::add_fct( "get_python_deltas" )
 golem::add_utils( "json_helpers" )
 
 ## External resources
