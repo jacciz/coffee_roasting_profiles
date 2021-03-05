@@ -9,8 +9,8 @@ Try executing this chunk by clicking the *Run* button within the chunk or by pla
 
 ```{r}
 library(magrittr)
-filename <- # 1-394 = 393
-  jsonlite::read_json("C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/saved/Dominican Republic--2021-02-25-17-09-27.json")
+# filename <- # 1-394 = 393
+  # jsonlite::read_json("C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/saved/Dominican Republic--2021-02-25-17-09-27.json")
 # filename2 <-
 # jsonlite::toJSON("C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/saved/Angola--2021-02-26-16-16-22.json")
 ```

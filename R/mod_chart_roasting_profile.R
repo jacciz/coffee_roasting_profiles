@@ -20,7 +20,7 @@ mod_chart_roasting_profile_ui <- function(id) {
 #'
 mod_chart_roasting_profile_server <- function(id, json_filename) {
   moduleServer(id, function(input, output, session) {
-    print( length(json_filename))
+    # print( length(json_filename))
     if (length(json_filename) > 5 | json_filename != "") {
 
       filename = paste0(".//data-raw/saved/", json_filename)

@@ -6,7 +6,7 @@ import json
 # import string
 # import csv
 from pandas import json_normalize
-import pandas as pd
+import pandas
 import numpy
 from scipy.signal import savgol_filter
 #numpy.float64
@@ -394,5 +394,5 @@ def get_ror_curves(file_raw):
   t1 = tuple(df["temp1"][0]) # very low temps?? 383.954
   t2 = tuple(df["temp2"][0]) # ??
   deltas = recomputeDeltas(timex=timex,CHARGEidx = CHARGEidx,DROPidx = DROPidx,t1 = t1,t2=t2)
-  df = pd.DataFrame(deltas)
+  df = pandas.DataFrame(deltas)
   return(df)

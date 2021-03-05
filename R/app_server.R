@@ -24,45 +24,6 @@ app_server <- function( input, output, session ) {
     })
 
 
-  # When selected data changes, table gets updated
-  # jittered_iris <- reactive({
-  #     haiti
-  # })
-  #
-  # shared_iris <- SharedData$new(jittered_iris)
-  #
-  # roasting_profile_data <- reactive({
-  #     # get_roasting_profile_data <- function(haiti) {
-  #     df = haiti
-  #         chart_analysis <- c(
-  #             time_zero = "1970-01-01 00:00:00 UTC",
-  #             charge_start = format(as_datetime(df$Time2[grepl("Charge", df$Event), "Time2"]), format = "%M:%S"),
-  #             time_max = format(max(as_datetime(df$Time2), na.rm = TRUE), format = "%M:%S"),
-  #             dry_end = format(as_datetime(df$Time2[grepl("Dry End", df$Event), "Time2"]), format = "%M:%S"),
-  #             first_crack_start = format(as_datetime(df$Time2[grepl("FCs", df$Event), "Time2"]), format =  "%M:%S"),
-  #             first_crack_end = format(as_datetime(df$Time2[grepl("FCe", df$Event), "Time2"]), format = "%M:%S"),
-  #             drop_start = format(as_datetime(df$Time2[grepl("Drop", df$Event), "Time2"]), format = "%M:%S"),
-  #             max_temp = 500,
-  #             # Highest temp in chart
-  #             end_temp = as.numeric(df[grepl("Drop", df$Event), "BT"])
-  #         ) %>% as.list()
-  #         chart_analysis
-  #     # }
-  # })
- rv <- reactiveValues(value_store = character())
- # When input changes -> update
- observeEvent(input$selected_filename, {
-   # output$selected_var <- renderText({
-   #   paste(input$selected_filename)
-   # })
-   # print(input$selected_filename) # WORKS
-   rv$value_store <- input$selected_filename
-   # print(rv$value_store) # works
-   # output$test <- renderText({
-   #   paste(rv$value_store)
-   # })
- })
- # x = reactive(rv$value_store)
   #  -------------- The Roast Profile Analysis Line Chart --------------------
  observeEvent(input$selected_filename, {
   mod_chart_roasting_profile_server("roast_profile_chart", input$selected_filename )# open_profile_by_filename()
@@ -108,9 +69,9 @@ app_server <- function( input, output, session ) {
       )
 
     # make a datatable for output
-    chart_analysis %>% pivot_longer(cols = 1:5, values_to = "data") %>% formattable(., list(
-      name = formatter("span", style = "color:#AAAAAA; font-size:14px; font-weight:bold;"),
-      data = formatter("span", style = "color:grey;")
+    chart_analysis %>% pivot_longer(cols = 1:5, values_to = "data") %>% formattable::formattable(., list(
+      name = formattable::formatter("span", style = "color:#AAAAAA; font-size:14px; font-weight:bold;"),
+      data = formattable::formatter("span", style = "color:grey;")
     ))
   })
   #  -------------- The Roast Profile --------------------
@@ -136,7 +97,7 @@ app_server <- function( input, output, session ) {
   observeEvent(input$click_data, {
     # print(input$click_data) # works
     r$click <- union(input$click_data, r$click)
-    print(r$click)# works
+    # print(r$click)# works
     # updateTextInput(session, "click_data", value = "")
   })
 

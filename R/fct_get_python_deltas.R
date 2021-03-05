@@ -1,8 +1,11 @@
-# reticulate::use_virtualenv('/path/to/myhybrid-project', required = TRUE)
+# reticulate::use_virtualenv('/usr/bin/python3 ', required = TRUE)
+
 
 # Read python functions and run it. Returns a raw df with 2 rows of delta1 and delta2
 get_python_deltas <- function(filename_to_open) {
   require(reticulate)
+  # reticulate::use_python("/usr/bin/python3")
+  # pandas <- reticulate::import("pandas")
   # filename_to_open = "Haiti--2021-02-09-20-15-17.json"
 
   # file_loc = paste0(".//data-raw/saved/", filename_to_open)

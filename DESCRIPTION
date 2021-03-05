@@ -6,6 +6,7 @@ Description: A comparison of cupping notes, profiles
 License: What license is it under?
 Imports: 
     config,
+    dplyr,
     golem,
     shiny,
     processx,
@@ -23,10 +24,12 @@ Imports:
     shinyFeedback,
     RSQLite,
     pool,
+    reticulate,
+    stringr,
     tidyr,
     utils,
     kableExtra,
-    shinydashboardPlus
+    pkgload
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
