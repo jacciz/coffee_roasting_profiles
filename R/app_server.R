@@ -26,53 +26,63 @@ app_server <- function( input, output, session ) {
 
   #  -------------- The Roast Profile Analysis Line Chart --------------------
  observeEvent(input$selected_filename, {
+   if (length(input$selected_filename) > 5 | input$selected_filename!= "") {
   mod_chart_roasting_profile_server("roast_profile_chart", input$selected_filename )# open_profile_by_filename()
- })
+   }
+     })
   # output$summary_profile_data <- function(){
   # input$uploaded_filenames is the filename
   # }
   output$roasting_profile_data <- renderFormattable({
 
-    get_roasting_profile_data <- function(df) {
-      chart_analysis <- c(
-        time_zero = "1970-01-01 00:00:00 UTC",
-        charge_start = format(as_datetime(df$Time2[grepl("Charge", df$Event), "Time2"]), format = "%M:%S"),
-        time_max = format(max(as_datetime(df$Time2), na.rm = TRUE), format = "%M:%S"),
-        dry_end = format(as_datetime(df$Time2[grepl("Dry End", df$Event), "Time2"]), format = "%M:%S"),
-        first_crack_start = format(as_datetime(df$Time2[grepl("FCs", df$Event), "Time2"]), format =  "%M:%S"),
-        first_crack_end = format(as_datetime(df$Time2[grepl("FCe", df$Event), "Time2"]), format = "%M:%S"),
-        drop_start = format(as_datetime(df$Time2[grepl("Drop", df$Event), "Time2"]), format = "%M:%S"),
-        # max_temp = 500, # Highest temp in chart
-        end_temp = as.character(as.numeric(df[grepl("Drop", df$Event), "BT"]))
-      ) %>% as.list()
+    # get_roasting_profile_data <- function(df) {
+    #   chart_analysis <- c(
+    #     time_zero = "1970-01-01 00:00:00 UTC",
+    #     charge_start = format(as_datetime(df$Time2[grepl("Charge", df$Event), "Time2"]), format = "%M:%S"),
+    #     time_max = format(max(as_datetime(df$Time2), na.rm = TRUE), format = "%M:%S"),
+    #     dry_end = format(as_datetime(df$Time2[grepl("Dry End", df$Event), "Time2"]), format = "%M:%S"),
+    #     first_crack_start = format(as_datetime(df$Time2[grepl("FCs", df$Event), "Time2"]), format =  "%M:%S"),
+    #     first_crack_end = format(as_datetime(df$Time2[grepl("FCe", df$Event), "Time2"]), format = "%M:%S"),
+    #     drop_start = format(as_datetime(df$Time2[grepl("Drop", df$Event), "Time2"]), format = "%M:%S"),
+    #     # max_temp = 500, # Highest temp in chart
+    #     end_temp = as.character(as.numeric(df[grepl("Drop", df$Event), "BT"]))
+    #   ) %>% as.list()
+    #
+    #   chart_analysis
+    # }
+    # chart_analysis <- get_roasting_profile_data(haiti)
+    #
+    # # Do calculations, finalize numbers and time to make into a table
+    # chart_analysis <-
+    #   chart_analysis %>% as.data.frame() %>% mutate(
+    #     duration = ms(drop_start) - ms(charge_start),
+    #     dev_time = ms(drop_start) - ms(first_crack_start),
+    #     duration = format(as_datetime(duration), format = "%M:%S"),
+    #     dev_ratio = paste0(round(ms(dev_time) * 100 / ms(duration), 1), "%"),
+    #     dev_time = format(as_datetime(dev_time), format = "%M:%S"),
+    #     end_temp = round(as.numeric(end_temp), 1)
+    #   ) %>% mutate_all(as.character) %>% select(
+    #     "First crack" = first_crack_start,
+    #     "Roast duration" = duration,
+    #     "Development time" = dev_time,
+    #     "Dev. time ratio" = dev_ratio,
+    #     "End temp.(\u00b0F)" = end_temp
+    #     # "End temp." = paste0(end_temp, "\u00b0F")
+    #   )
+    #
+    # # make a datatable for output
+    # chart_analysis %>% pivot_longer(cols = 1:5, values_to = "data") %>% formattable::formattable(., list(
+    #   name = formattable::formatter("span", style = "color:#AAAAAA; font-size:14px; font-weight:bold;"),
+    #   data = formattable::formatter("span", style = "color:grey;")
+    # ))
 
-      chart_analysis
-    }
-    chart_analysis <- get_roasting_profile_data(haiti)
 
-    # Do calculations, finalize numbers and time to make into a table
-    chart_analysis <-
-      chart_analysis %>% as.data.frame() %>% mutate(
-        duration = ms(drop_start) - ms(charge_start),
-        dev_time = ms(drop_start) - ms(first_crack_start),
-        duration = format(as_datetime(duration), format = "%M:%S"),
-        dev_ratio = paste0(round(ms(dev_time) * 100 / ms(duration), 1), "%"),
-        dev_time = format(as_datetime(dev_time), format = "%M:%S"),
-        end_temp = round(as.numeric(end_temp), 1)
-      ) %>% mutate_all(as.character) %>% select(
-        "First crack" = first_crack_start,
-        "Roast duration" = duration,
-        "Development time" = dev_time,
-        "Dev. time ratio" = dev_ratio,
-        "End temp.(\u00b0F)" = end_temp
-        # "End temp." = paste0(end_temp, "\u00b0F")
-      )
+      if (length(input$selected_filename) > 5 | input$selected_filename!= "") {
+        get_data_to_display_at_upload(input$selected_filename) %>%
+         formattable::formattable# open_profile_by_filename()
+      }
 
-    # make a datatable for output
-    chart_analysis %>% pivot_longer(cols = 1:5, values_to = "data") %>% formattable::formattable(., list(
-      name = formattable::formatter("span", style = "color:#AAAAAA; font-size:14px; font-weight:bold;"),
-      data = formattable::formatter("span", style = "color:grey;")
-    ))
+
   })
   #  -------------- The Roast Profile --------------------
 

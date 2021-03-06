@@ -21,48 +21,47 @@ mod_chart_roasting_profile_ui <- function(id) {
 mod_chart_roasting_profile_server <- function(id, json_filename) {
   moduleServer(id, function(input, output, session) {
     # print( length(json_filename))
-    if (length(json_filename) > 5 | json_filename != "") {
 
+    # json_filename = "Haiti--2021-02-09-20-15-17"
+    # Read json file
       filename = paste0(".//data-raw/saved/", json_filename)
-      print(filename)
+
       json_file <-
         jsonlite::read_json(filename)
 
-    deltas = get_python_deltas(filename)
-    cleaned_deltas = clean_deltas_from_python(deltas)
+      # Get the deltas and clean them
+      deltas = get_python_deltas(filename)
+      cleaned_deltas = clean_deltas_from_python(deltas)
+
+      times <-
+        get_data_of_times_temps(json_file) %>%
+        dplyr::mutate_if(is.character, as.numeric)
+
+      # Deltas ready to be plotted, also has BT and ET
+      deltas_clean = add_times_to_delta(cleaned_deltas, all_times = times)
 
   output$roast_profile <-
     plotly::renderPlotly({
-    times <-
-    get_data_of_times_temps(json_file) %>%
-    dplyr::mutate_if(is.character, as.numeric)
+
+    # Heat, fan times
   special_times <- get_special_event_times(json_file)
+
+  # FC, phase times
   event_times <-
-    get_event_times(json_file) %>%
-    dplyr::mutate_if(is.character, as.numeric)
+    get_event_times(json_file)
 
+  # # This needs data from times
+  # add_times_to_delta <-
+  #   function(cleaned_deltas,
+  #            time_list = times$time) {
+  #     time_list = times$time # 472
+  #     time_length = length(time_list)
+  #     cleaned_deltas %>% dplyr::slice_tail(n = time_length) %>% dplyr::mutate(timex = time_list)
+  #   }
+  #
+  # # Deltas ready to be plotted
+  # deltas_clean = add_times_to_delta(cleaned_deltas)
 
-  # Get data for parameters for charts
-  time_zero = lubridate::as_datetime("1970-01-01 00:00:00 UTC")
-  # time_max = max(as_datetime(profile$Time2), na.rm = TRUE)
-  dry_end = lubridate::as_datetime(event_times$dry_time)
-  first_crack_start = lubridate::as_datetime(event_times$fc_time_start)
-  first_crack_end = lubridate::as_datetime(event_times$fc_time_end)
-  second_crack_start = lubridate::as_datetime(event_times$sc_time_start)
-  drop_time = lubridate::as_datetime(event_times$drop_time)
-  max_temp = 500 # Highest temp in chart
-
-  # This needs data from times
-  add_times_to_delta <-
-    function(cleaned_deltas,
-             time_list = times$time) {
-      time_list = times$time # 472
-      time_length = length(time_list)
-      cleaned_deltas %>% dplyr::slice_tail(n = time_length) %>% dplyr::mutate(timex = time_list)
-    }
-
-  # Deltas ready to be plotted
-  deltas_clean = add_times_to_delta(cleaned_deltas)
   plotly::plot_ly(
     # BT Line
     times,
@@ -104,10 +103,10 @@ mod_chart_roasting_profile_server <- function(id, json_filename) {
       bgcolor = ~ color
     ) %>%                     # Add lines for phases
     plotly::add_segments(
-      x = ~ dry_end,
-      xend = ~ dry_end,
+      x = ~ event_times$dry_time,
+      xend = ~ event_times$dry_time,
       y =  ~ 0,
-      yend =  ~ max_temp,
+      yend =  ~ event_times$max_temp,
       # opacity = 1,
       line = list(
         dash = "dash",
@@ -117,10 +116,10 @@ mod_chart_roasting_profile_server <- function(id, json_filename) {
       name = "Dry end"
     ) %>%
     plotly::add_segments(
-      x = ~ first_crack_start,
-      xend = ~ first_crack_start,
+      x = ~ event_times$fc_time_start,
+      xend = ~ event_times$fc_time_start,
       y =  ~ 0,
-      yend =  ~ max_temp,
+      yend =  ~ event_times$max_temp,
       # opacity = 1,
       line = list(
         dash = "dash",
@@ -130,10 +129,10 @@ mod_chart_roasting_profile_server <- function(id, json_filename) {
       name = "FC start"
     ) %>%
     plotly::add_segments(
-      x = ~ first_crack_end,
-      xend = ~ first_crack_end,
+      x = ~ event_times$fc_time_end,
+      xend = ~ event_times$fc_time_end,
       y =  ~ 0,
-      yend =  ~ max_temp,
+      yend =  ~ event_times$max_temp,
       # opacity = 1,
       line = list(
         dash = "dash",
@@ -149,10 +148,10 @@ mod_chart_roasting_profile_server <- function(id, json_filename) {
     #                           color = 'gray80',
     #                           width = 2), name = "FC start") %>%
     plotly::add_segments(
-      x = ~ drop_time,
-      xend = ~ drop_time,
+      x = ~ event_times$drop_time,
+      xend = ~ event_times$drop_time,
       y =  ~ 0,
-      yend =  ~ max_temp,
+      yend =  ~ event_times$max_temp,
       # opacity = 1,
       line = list(
         dash = "dash",
@@ -167,7 +166,7 @@ mod_chart_roasting_profile_server <- function(id, json_filename) {
       x = ~ lubridate::as_datetime(timex),
       y = ~ dtemp1,
       line = list(color = "#428BCA"),
-      name = "\u0394BT",
+      name = "\u0394ET",
       yaxis = "y2"
     ) %>%
     plotly::add_trace(
@@ -176,7 +175,7 @@ mod_chart_roasting_profile_server <- function(id, json_filename) {
       x = ~ lubridate::as_datetime(timex),
       y = ~ dtemp2,
       line = list(color = "#3f0585"),
-      name = "\u0394ET",
+      name = "\u0394BT",
       yaxis = "y2"
     ) %>%
     plotly::layout(
@@ -197,7 +196,7 @@ mod_chart_roasting_profile_server <- function(id, json_filename) {
         zeroline = F,
         showline = F,
         showgrid = F,
-        tick0 = time_zero,
+        tick0 = event_times$time_zero,
         ticks = "inside",
         tickcolor = "rgb(245,245,245)",
         tickformat = "%M:%S",
@@ -221,7 +220,7 @@ mod_chart_roasting_profile_server <- function(id, json_filename) {
       paper_bgcolor = 'rgb(245,245,245)'
     )
 })
-    }
+    # }
   })
 }
 

@@ -1,0 +1,324 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+library(magrittr)
+filename <-
+  jsonlite::read_json("../data-raw/saved/Dominican Republic--2021-02-25-17-09-27.json")
+# filename2 <-
+# jsonlite::toJSON("C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/saved/Angola--2021-02-26-16-16-22.json")
+```
+```{r}
+# These are in fct_upload_json_data
+get_data_to_display_at_upload(filename)
+get_special_event_times(filename) 
+get_data_of_times_temps(filename) 
+x = get_event_times(filename)
+```
+```{r put data in chart}
+# Time with BT and ET
+
+times <-
+  get_data_of_times_temps(filename) %>%
+  dplyr::mutate_if(is.character, as.numeric)
+special_times <- get_special_event_times(filename)
+event_times <-
+  get_event_times(filename) %>%
+  dplyr::mutate_if(is.character, as.numeric)
+
+# Get data for parameters for charts
+time_zero = lubridate::as_datetime("1970-01-01 00:00:00 UTC")
+# time_max = max(as_datetime(profile$Time2), na.rm = TRUE)
+dry_end = lubridate::as_datetime(event_times$dry_time)
+first_crack_start = lubridate::as_datetime(event_times$fc_time_start)
+first_crack_end = lubridate::as_datetime(event_times$fc_time_end)
+second_crack_start = lubridate::as_datetime(event_times$sc_time_start)
+drop_time = lubridate::as_datetime(event_times$drop_time)
+max_temp = 500 # Highest temp in chart
+
+add_times_to_delta <-
+  function(cleaned_deltas,
+           time_list = times$time) {
+    time_list = times$time # 472
+    time_length = length(time_list)
+    cleaned_deltas %>% dplyr::slice_tail(n = time_length) %>% dplyr::mutate(timex = time_list)
+  }
+
+
+add_times_to_delta(clean)
+# Deltas ready to be plotted
+deltas_clean = add_times_to_delta(clean)
+plotly::plot_ly(
+  # BT Line
+  times,
+  type = 'scatter',
+  mode = 'lines',
+  x = ~ lubridate::as_datetime(time),
+  line = list(color = "#4DB848"),
+  # x = ~seq(ms("00:00"), ms("10:10")),
+  # x = ~ lubridate::ms(Time2),
+  # x = ~ lubridate::as_datetime(Time1),
+  y = ~ BT,
+  # hovertemplate = paste('%{y: .1f}\u00b0F', '<br>%{x}<br>'),
+  hovertemplate = '%{y: .1f}\u00b0F',
+  showlegend = FALSE,
+  name = "BT"
+) %>%
+  plotly::add_trace(
+    times,
+    # ET Line
+    mode = 'lines',
+    x = ~ lubridate::as_datetime(time),
+    y = ~ ET,
+    line = list(color = "#D50032"),
+    name = "ET"
+  ) %>%
+  plotly::layout(hovermode = "x unified") %>%
+plotly::add_annotations( # Special events
+    data = special_times,
+    x =  ~ lubridate::as_datetime(as.numeric(time_of_event)),
+    # y = ~ jitter(400, 60),
+    y = ~ 500,
+    text = ~ type_of_event,
+    # yaxis = "y2",
+    textposition = "top center",
+    showarrow = FALSE,
+    # arrowhead = .5,
+    # arrowwidth = 1,
+    font = list(size = 12, color = "#ffffff"),
+    bgcolor = ~ color
+) %>%                     # Add lines for phases
+plotly::add_segments(
+  x = ~ dry_end,
+  xend = ~ dry_end,
+  y =  ~ 0,
+  yend =  ~ max_temp,
+  # opacity = 1,
+  line = list(
+    dash = "dash",
+    color = '#AAAAAA',
+    width = 2
+  ),
+  name = "Dry end"
+) %>%
+  plotly::add_segments(
+    x = ~ first_crack_start,
+    xend = ~ first_crack_start,
+    y =  ~ 0,
+    yend =  ~ max_temp,
+    # opacity = 1,
+    line = list(
+      dash = "dash",
+      color = '#AAAAAA',
+      width = 2
+    ),
+    name = "FC start"
+  ) %>%
+  plotly::add_segments(
+    x = ~ first_crack_end,
+    xend = ~ first_crack_end,
+    y =  ~ 0,
+    yend =  ~ max_temp,
+    # opacity = 1,
+    line = list(
+      dash = "dash",
+      color = '#AAAAAA',
+      width = 2
+    ),
+    name = "FC end"
+  ) %>%
+  # For second_crash_start
+  # add_segments( x = ~first_crack_start, xend = ~first_crack_start, y =~ 0, yend=~500,
+  #               # opacity = 1,
+  #               line = list(dash="dash",
+  #                           color = 'gray80',
+  #                           width = 2), name = "FC start") %>%
+  plotly::add_segments(
+    x = ~ drop_time,
+    xend = ~ drop_time,
+    y =  ~ 0,
+    yend =  ~ max_temp,
+    # opacity = 1,
+    line = list(
+      dash = "dash",
+      color = '#AAAAAA',
+      width = 2
+    ),
+    name = "FC start"
+  ) %>%
+   plotly::add_trace(
+     data = deltas_clean,        # Change BT Line
+        mode = 'lines',
+        x = ~ lubridate::as_datetime(timex),
+        y = ~ dtemp1,
+        line = list(color = "#428BCA"),
+        name = "\u0394BT",
+        yaxis = "y2"
+      ) %>% 
+     plotly::add_trace(
+     data = deltas_clean,        # Change ET Line
+        mode = 'lines',
+        x = ~ lubridate::as_datetime(timex),
+        y = ~ dtemp2,
+        line = list(color = "#3f0585"),
+        name = "\u0394ET",
+        yaxis = "y2"
+      ) %>% 
+  plotly::layout(
+    # The right side y-axis
+    yaxis2 = list(
+      zeroline = F,
+      showline = F,
+      showgrid = F,
+      tickfont = list(color = "#428BCA"),
+      ticksuffix = "\u00b0F",
+      overlaying = "y",
+      side = "right",
+      title = ""
+    ),
+    xaxis = list(
+      # gridcolor = toRGB("gray85"),
+      title = "",
+      zeroline = F,
+      showline = F,
+      showgrid = F,
+      tick0 = time_zero,
+      ticks = "inside",
+      tickcolor = "rgb(245,245,245)",
+      tickformat = "%M:%S",
+      dtick = 30000 # Tick every 30 seconds
+    ),
+    yaxis = list(
+      title = "",
+      ticksuffix = "\u00b0F",
+      zeroline = F,
+      showline = F,
+      showgrid = F
+    ),
+    margin = list(
+      r = 30,
+      l = 0,
+      b = 0,
+      t = 0
+    ),
+    plot_bgcolor = 'rgb(245,245,245)',
+    # make grey background
+    paper_bgcolor = 'rgb(245,245,245)'
+  )
+```
+```{r}
+# mess with format
+
+x=lubridate::as_datetime(as.numeric(times$time))
+lubridate::hms(x)
+lubridate::minute(x)
+lubridate::seconds(x)
+lubridate::seconds_to_period(as.numeric(times$time)) %>% lubridate::ms() # THIS?
+lubridate::fast_strptime(x, format = "%H%M")
+(parse_date_time2(times$time))
+
+sub(":\\d{2}", "", times((minutes%/%60 +  minutes%%60 /3600)/24))
+
+as.numeric(times$time)%/%60  +  as.numeric(times$time)%%60 /3600
+
+
+   plotly::plot_ly(
+      # BT Line
+      times,
+      type = 'scatter',
+      mode = 'lines',
+      x = ~ lubridate::as_datetime(as.numeric(time)),
+      line = list(color = "#4DB848"),
+      # x = ~seq(ms("00:00"), ms("10:10")),
+      # x = ~ lubridate::ms(Time2),
+      # x = ~ lubridate::as_datetime(Time1),
+      y = ~ BT,
+      # hovertemplate = paste('%{y: .1f}\u00b0F', '<br>%{x}<br>'),
+      hovertemplate = '%{y: .1f}\u00b0F',
+      showlegend = FALSE,
+      name = "BT"
+    ) %>% plotly::layout(xaxis = list(tickformat = "%M:%S"))
+```
+```{r test}
+plotly::plot_ly(
+  # BT Line
+  times,
+  type = 'scatter',
+  mode = 'lines',
+  x = ~ lubridate::as_datetime(time),
+  line = list(color = "#4DB848"),
+  # x = ~seq(ms("00:00"), ms("10:10")),
+  # x = ~ lubridate::ms(Time2),
+  # x = ~ lubridate::as_datetime(Time1),
+  y = ~ BT,
+  # hovertemplate = paste('%{y: .1f}\u00b0F', '<br>%{x}<br>'),
+  hovertemplate = '%{y: .1f}\u00b0F',
+  showlegend = FALSE,
+  name = "BT"
+) %>%
+  plotly::layout(hovermode = "x unified") %>%                  # Add lines for phases
+  plotly::add_segments(
+    x = ~ dry_end,
+    xend = ~ dry_end,
+    y =  ~ 0,
+    yend =  ~ max_temp,
+    # opacity = 1,
+    line = list(
+      dash = "dash",
+      color = '#AAAAAA',
+      width = 2
+    ),
+    name = "Dry end"
+  )
+```
+```{r}
+times = get_data_of_phase_times(filename) %>% tidyr::pivot_longer(everything(), values_to = "phase_time") %>% dplyr::mutate(group = "a", name = factor(name, levels = c("dryphase","midphase","developphase")))
+times$name
+
+colors <- c('#4DB848', '#FF9673', '#E1C8B4')
+
+plotly::plot_ly(
+  times,
+  # x =~name,
+  y = ~ group,
+  name =  ~ name,
+  orientation = 'h',
+  hovertemplate = '%{x: .1f} s',
+  type = 'bar'
+) %>%
+  plotly::add_trace(x =~phase_time, marker = list(color = colors)) %>%
+  plotly::layout(barmode = 'stack') %>% plotly::layout(
+  showlegend = FALSE,
+   xaxis = list(
+      title = "",
+      showticklabels = FALSE,
+      zeroline = F,
+      showline = F,
+      showgrid = F),
+    yaxis = list(
+      title = "",
+      showticklabels = FALSE,
+      zeroline = F,
+      showline = F,
+      showgrid = F
+    ),
+    margin = list(
+      r = 0,
+      l = 0,
+      b = 0,
+      t = 0
+    ),
+    plot_bgcolor = 'rgb(245,245,245)',
+    # make grey background
+    paper_bgcolor = 'rgb(245,245,245)'
+  )
+
+```
+
+
