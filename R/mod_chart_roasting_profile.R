@@ -12,7 +12,6 @@ mod_chart_roasting_profile_ui <- function(id) {
   tagList(plotly::plotlyOutput(ns("roast_profile")))
 }
 
-
 #' chart_roasting_profile Server Function
 #'
 #' @noRd
@@ -30,15 +29,31 @@ mod_chart_roasting_profile_server <- function(id, json_filename) {
         jsonlite::read_json(filename)
 
       # Get the deltas and clean them
-      deltas = get_python_deltas(filename)
-      cleaned_deltas = clean_deltas_from_python(deltas)
+      # deltas = get_python_deltas(filename)
+      # cleaned_deltas = clean_deltas_from_python(deltas)
 
       times <-
         get_data_of_times_temps(json_file) %>%
         dplyr::mutate_if(is.character, as.numeric)
 
       # Deltas ready to be plotted, also has BT and ET
-      deltas_clean = add_times_to_delta(cleaned_deltas, all_times = times)
+      # deltas_clean = add_times_to_delta(cleaned_deltas, all_times = times)
+
+      phase_times = get_data_of_phase_times(json_file) %>%
+        tidyr::pivot_longer(everything(), values_to = "phase_time") %>%
+        dplyr::mutate(name = factor(name, levels = c("Dry", "Mid", "Dev"))) %>% # add levels
+        dplyr::mutate(percent = as.character(round(phase_time * 100 / sum(phase_time),1)), # Get phase percent
+                      phase_time_mid = cumsum(phase_time)) %>% # Get midpoint
+        dplyr::mutate_if(is.integer, lubridate::as_datetime) %>% # Make into datetime so we can chart it
+        dplyr::mutate_if(is.numeric, lubridate::as_datetime)
+
+      # Get start times of each phase so that is where the label will be
+      phase_times[phase_times$name == "Dry", "label_point" ] = as_datetime(0)
+      phase_times[phase_times$name == "Mid", "label_point" ] = phase_times[phase_times$name == "Dry", "phase_time_mid" ] + 1
+      phase_times[phase_times$name == "Dev", "label_point" ] = phase_times[phase_times$name == "Mid", "phase_time_mid" ] + 1
+
+    # colors for the 3 phase bars on top
+      phase_colors <- c('#4DB848', '#FF9673', '#E1C8B4')
 
   output$roast_profile <-
     plotly::renderPlotly({
@@ -63,28 +78,29 @@ mod_chart_roasting_profile_server <- function(id, json_filename) {
   # deltas_clean = add_times_to_delta(cleaned_deltas)
 
   plotly::plot_ly(
-    # BT Line
-    times,
-    type = 'scatter',
-    mode = 'lines',
-    x = ~ lubridate::as_datetime(time),
-    line = list(color = "#4DB848"),
-    # x = ~seq(ms("00:00"), ms("10:10")),
-    # x = ~ lubridate::ms(Time2),
-    # x = ~ lubridate::as_datetime(Time1),
-    y = ~ BT,
-    # hovertemplate = paste('%{y: .1f}\u00b0F', '<br>%{x}<br>'),
-    hovertemplate = '%{y: .1f}\u00b0F',
-    showlegend = FALSE,
-    name = "BT"
+    data = times,
+    x = ~ lubridate::as_datetime(time)
   ) %>%
-    plotly::add_trace(
-      times,
-      # ET Line
+    plotly::add_lines(
+      data = times,  # ET Line
+      type = 'scatter',
       mode = 'lines',
-      x = ~ lubridate::as_datetime(time),
-      y = ~ ET,
+      line = list(color = "#4DB848"),
+      y = ~ BT,
+      # hovertemplate = paste('%{y: .1f}\u00b0F', '<br>%{x}<br>'),
+      hovertemplate = '%{y: .1f}\u00b0F',
+      showlegend = FALSE,
+      name = "BT"
+    ) %>%
+    plotly::add_lines(
+      data = times,  # ET Line
+      type = 'scatter',
+      mode = 'lines',
       line = list(color = "#D50032"),
+      y = ~ ET,
+      # hovertemplate = paste('%{y: .1f}\u00b0F', '<br>%{x}<br>'),
+      hovertemplate = '%{y: .1f}\u00b0F',
+      showlegend = FALSE,
       name = "ET"
     ) %>%
     plotly::layout(hovermode = "x unified") %>%
@@ -92,7 +108,7 @@ mod_chart_roasting_profile_server <- function(id, json_filename) {
       data = special_times,
       x =  ~ lubridate::as_datetime(as.numeric(time_of_event)),
       # y = ~ jitter(400, 60),
-      y = ~ 500,
+      y = ~ 10,
       text = ~ type_of_event,
       # yaxis = "y2",
       textposition = "top center",
@@ -142,7 +158,10 @@ mod_chart_roasting_profile_server <- function(id, json_filename) {
       name = "FC end"
     ) %>%
     # For second_crash_start
-    # add_segments( x = ~first_crack_start, xend = ~first_crack_start, y =~ 0, yend=~500,
+    # add_segments( x = ~first_crack_start,
+    # xend = ~first_crack_start
+    # y =~ 0,
+    # yend=~event_times$max_temp,
     #               # opacity = 1,
     #               line = list(dash="dash",
     #                           color = 'gray80',
@@ -160,24 +179,24 @@ mod_chart_roasting_profile_server <- function(id, json_filename) {
       ),
       name = "FC start"
     ) %>%
-    plotly::add_trace(
-      data = deltas_clean,        # Change BT Line
-      mode = 'lines',
-      x = ~ lubridate::as_datetime(timex),
-      y = ~ dtemp1,
-      line = list(color = "#428BCA"),
-      name = "\u0394ET",
-      yaxis = "y2"
-    ) %>%
-    plotly::add_trace(
-      data = deltas_clean,        # Change ET Line
-      mode = 'lines',
-      x = ~ lubridate::as_datetime(timex),
-      y = ~ dtemp2,
-      line = list(color = "#3f0585"),
-      name = "\u0394BT",
-      yaxis = "y2"
-    ) %>%
+    # plotly::add_trace(
+    #   data = deltas_clean,        # Change BT Line
+    #   mode = 'lines',
+    #   x = ~ lubridate::as_datetime(timex),
+    #   y = ~ dtemp1,
+    #   line = list(color = "#428BCA"),
+    #   name = "\u0394ET",
+    #   yaxis = "y2"
+    # ) %>%
+    # plotly::add_trace(
+    #   data = deltas_clean,        # Change ET Line
+    #   mode = 'lines',
+    #   x = ~ lubridate::as_datetime(timex),
+    #   y = ~ dtemp2,
+    #   line = list(color = "#3f0585"),
+    #   name = "\u0394BT",
+    #   yaxis = "y2"
+    # ) %>%
     plotly::layout(
       # The right side y-axis
       yaxis2 = list(
@@ -218,7 +237,20 @@ mod_chart_roasting_profile_server <- function(id, json_filename) {
       plot_bgcolor = 'rgb(245,245,245)',
       # make grey background
       paper_bgcolor = 'rgb(245,245,245)'
-    )
+    ) %>% # Add 3 phases on top
+    plotly::add_bars(
+      data = phase_times,
+      x =~ phase_time,
+      y = ~ 500,
+      name =  ~ name,
+      width = 25,
+      text =~ name, #?
+      orientation = 'h',
+      showlegend = FALSE,
+      marker = list(color = colors)
+    ) %>%
+    plotly::layout(barmode = 'stack') %>%
+    plotly::add_text(data = phase_times, x =~ label_point, text =~ paste0(name,": ",percent,"%"),y = 500, textposition = "right", textfont = list(size = 12, color = "#ffffff"))
 })
     # }
   })

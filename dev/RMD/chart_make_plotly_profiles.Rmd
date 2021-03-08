@@ -54,27 +54,25 @@ add_times_to_delta <-
 add_times_to_delta(clean)
 # Deltas ready to be plotted
 deltas_clean = add_times_to_delta(clean)
+
 plotly::plot_ly(
-  # BT Line
-  times,
+  data = times,
+  x = ~ lubridate::as_datetime(time)
+) %>% 
+plotly::add_lines(
+  data = times,  # ET Line
   type = 'scatter',
   mode = 'lines',
-  x = ~ lubridate::as_datetime(time),
   line = list(color = "#4DB848"),
-  # x = ~seq(ms("00:00"), ms("10:10")),
-  # x = ~ lubridate::ms(Time2),
-  # x = ~ lubridate::as_datetime(Time1),
   y = ~ BT,
   # hovertemplate = paste('%{y: .1f}\u00b0F', '<br>%{x}<br>'),
   hovertemplate = '%{y: .1f}\u00b0F',
   showlegend = FALSE,
   name = "BT"
-) %>%
-  plotly::add_trace(
-    times,
-    # ET Line
+) %>% 
+  plotly::add_lines(
+    data = times,   # ET Line
     mode = 'lines',
-    x = ~ lubridate::as_datetime(time),
     y = ~ ET,
     line = list(color = "#D50032"),
     name = "ET"

@@ -18,50 +18,35 @@ app_server <- function( input, output, session ) {
       reactive({
           pool::dbReadTable(pool, "roast_profiles") #%>% filter(country == input$country)# filter(Org_Name %in% input$health_clinic)
       })
-  open_profile_by_filename <- # Based on country for now
+
+  # Read the selected file, opens sql and json
+  open_profile_by_filename <-
     reactive({
       pool::dbReadTable(pool, "roast_profiles") %>% filter(filename == input$selected_filename)
     })
 
+  open_profile_by_filename_json <-
+    reactive({
+      if (length(input$selected_filename) > 5 | input$selected_filename!= "") {
+        filename = paste0(".//data-raw/saved/", input$selected_filename)
+        json_file <- jsonlite::read_json(filename)
+        json_file
+      }
+    })
 
   #  -------------- The Roast Profile Analysis Line Chart --------------------
  observeEvent(input$selected_filename, {
    if (length(input$selected_filename) > 5 | input$selected_filename!= "") {
   mod_chart_roasting_profile_server("roast_profile_chart", input$selected_filename )# open_profile_by_filename()
-   }
+
+     }
      })
   # output$summary_profile_data <- function(){
   # input$uploaded_filenames is the filename
   # }
   output$roasting_profile_data <- renderFormattable({
-
-    # get_roasting_profile_data <- function(df) {
-    #   chart_analysis <- c(
-    #     time_zero = "1970-01-01 00:00:00 UTC",
-    #     charge_start = format(as_datetime(df$Time2[grepl("Charge", df$Event), "Time2"]), format = "%M:%S"),
-    #     time_max = format(max(as_datetime(df$Time2), na.rm = TRUE), format = "%M:%S"),
-    #     dry_end = format(as_datetime(df$Time2[grepl("Dry End", df$Event), "Time2"]), format = "%M:%S"),
-    #     first_crack_start = format(as_datetime(df$Time2[grepl("FCs", df$Event), "Time2"]), format =  "%M:%S"),
-    #     first_crack_end = format(as_datetime(df$Time2[grepl("FCe", df$Event), "Time2"]), format = "%M:%S"),
-    #     drop_start = format(as_datetime(df$Time2[grepl("Drop", df$Event), "Time2"]), format = "%M:%S"),
-    #     # max_temp = 500, # Highest temp in chart
-    #     end_temp = as.character(as.numeric(df[grepl("Drop", df$Event), "BT"]))
-    #   ) %>% as.list()
-    #
-    #   chart_analysis
-    # }
-    # chart_analysis <- get_roasting_profile_data(haiti)
-    #
     # # Do calculations, finalize numbers and time to make into a table
-    # chart_analysis <-
-    #   chart_analysis %>% as.data.frame() %>% mutate(
-    #     duration = ms(drop_start) - ms(charge_start),
-    #     dev_time = ms(drop_start) - ms(first_crack_start),
-    #     duration = format(as_datetime(duration), format = "%M:%S"),
-    #     dev_ratio = paste0(round(ms(dev_time) * 100 / ms(duration), 1), "%"),
-    #     dev_time = format(as_datetime(dev_time), format = "%M:%S"),
-    #     end_temp = round(as.numeric(end_temp), 1)
-    #   ) %>% mutate_all(as.character) %>% select(
+    #
     #     "First crack" = first_crack_start,
     #     "Roast duration" = duration,
     #     "Development time" = dev_time,
@@ -69,20 +54,20 @@ app_server <- function( input, output, session ) {
     #     "End temp.(\u00b0F)" = end_temp
     #     # "End temp." = paste0(end_temp, "\u00b0F")
     #   )
-    #
-    # # make a datatable for output
-    # chart_analysis %>% pivot_longer(cols = 1:5, values_to = "data") %>% formattable::formattable(., list(
-    #   name = formattable::formatter("span", style = "color:#AAAAAA; font-size:14px; font-weight:bold;"),
-    #   data = formattable::formatter("span", style = "color:grey;")
-    # ))
-
-
-      if (length(input$selected_filename) > 5 | input$selected_filename!= "") {
-        get_data_to_display_at_upload(input$selected_filename) %>%
-         formattable::formattable# open_profile_by_filename()
-      }
-
-
+    # print(input$selected_filename)
+    if (length(input$selected_filename) > 5 | input$selected_filename != "" | !is.null(input$selected_filename)) {
+    open_profile_by_filename_json() %>% get_event_times() %>%
+      select(-max_temp) %>%
+      mutate_if(is.POSIXct, format, format = "%M:%S") %>%
+      pivot_longer(cols = 1:9, values_to = "data") %>%
+      formattable::formattable(.,
+                               list(
+                                 name = formattable::formatter("span", style = "color:#AAAAAA; font-size:14px; font-weight:bold;"),
+                                 data = formattable::formatter("span", style = "color:grey;")
+                               ))
+    } else {
+      formattable::formattable()
+    }
   })
   #  -------------- The Roast Profile --------------------
 
@@ -164,32 +149,8 @@ app_server <- function( input, output, session ) {
     # extendsunburstcolors = TRUE) # This makes colors light with more slices
   })
 
-  #  -------------- Chart of QCI --------------------
-  # output$arabica <- renderDT({
-  #     datatable(arab)
-  # })
-
-  #  -------------- Input Roast Data from file/user --------------------
+    #  -------------- Input Roast Data from file/user --------------------
   # Example: https://www.youtube.com/user/RodCoelho/search?query=MySQL Don't need loadDropdown as we are not deleting records
-
-  # # name
-  # list_data <- loadData(c("primary_key", "roast_date", "country"), "roast_profiles") %>% as.data.frame()
-  # list_data <- rbind(data.frame("primary_key" = 0, "roast_date" = Sys.Date(), "country" = "Other"),list_data) # Adds a new row of empty values
-  # # country_list <- setNames(nm = c(list_data$primary_key, list_data$roast_data, list_data$country)) # strips the header names
-  # names(list_data) <- NULL
-  # # output$get_primary_key <- renderUI({
-  # #     selectInput("selected_primary_key", "primary Keys", country_list, width = '100%', selected = NULL)
-  # # })
-  #
-  # list_data <- loadData(c("roast_date", "country"), "roast_profiles") %>% as.data.frame()
-  # list_data <- rbind(data.frame("roast_date" = Sys.Date(), "country" = "None"),list_data) # Adds a new row of empty values
-  # # country_list <- setNames(nm = c( list_data$roast_data, list_data$country)) # strips the header names
-  # names(list_data) <- NULL # Strip header
-  # output$get_primary_key <- renderUI({
-  #     selectInput("selected_primary_key", "primary Keys", country_list, width = '100%', selected = NULL)
-  # })
-
-
   #  -------------- Input Roast Data - Dropdowns for Form --------------------
 
   output$get_filenames_saved <- renderUI({
@@ -352,13 +313,11 @@ app_server <- function( input, output, session ) {
       # Convert opened JSON into R format :)
       profile_as_json <-
         jsonlite::fromJSON(opened_json)
-      # x <- profile_as_json$timex %>% as.data.frame() %>% head()
-      # print(x)
+
       get_data_to_display_at_upload(profile_as_json) %>%
         tidyr::pivot_longer(cols = 1:7, values_to = "data") %>%
         kableExtra::kbl(col.names = c("", ""), align = "l", centering = FALSE) %>%
         kableExtra::kable_minimal()
-      # formattable(x)
     } else{
       return(NULL)
     }

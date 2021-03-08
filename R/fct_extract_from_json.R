@@ -57,13 +57,14 @@ get_event_times <- function(json_file) {
   tibble::tibble(
     time_zero = lubridate::as_datetime("1970-01-01 00:00:00 UTC"),
     tp_time = lubridate::as_datetime(json_file[["computed"]][["TP_time"]][[1]]),
-    dry_time = lubridate::as_datetime(json_file[["computed"]][["DRY_time"]][[1]]),
+    dry_time = lubridate::as_datetime(json_file[["computed"]][["DRY_time"]][[1]]), # This may be automatic
     fc_time_start = ifelse(is.null(json_file[["computed"]][["FCs_time"]][[1]]), 0, json_file[["computed"]][["FCs_time"]][[1]]),
     fc_time_end = ifelse(is.null(json_file[["computed"]][["FCe_time"]][[1]]), 0, json_file[["computed"]][["FCe_time"]][[1]]),
     sc_time_start = ifelse(is.null(json_file[["computed"]][["SCs_time"]][[1]]), 0, json_file[["computed"]][["SCs_time"]][[1]]),
     sc_time_end = ifelse(is.null(json_file[["computed"]][["SCe_time"]][[1]]), 0, json_file[["computed"]][["SCe_time"]][[1]]),
     drop_time = lubridate::as_datetime(json_file[["computed"]][["DROP_time"]][[1]]),
-    max_temp = 500
+    max_temp = 500,
+    development_time = drop_time - fc_time_start
   ) %>% dplyr::mutate(fc_time_start = lubridate::as_datetime(fc_time_start),
                       fc_time_end = lubridate::as_datetime(fc_time_end),
                       sc_time_start = lubridate::as_datetime(sc_time_start),
@@ -78,9 +79,9 @@ get_event_times <- function(json_file) {
 #' @export
 get_data_of_phase_times <- function(json_file) {
   tibble::tibble(
-    dryphase = as.integer(json_file[["computed"]][["dryphasetime"]]),
-    midphase = as.integer(json_file[["computed"]][["midphasetime"]]),
-    developphase = as.integer(json_file[["computed"]][["finishphasetime"]])
+    Dry = (json_file[["computed"]][["dryphasetime"]][[1]]),
+    Mid = (json_file[["computed"]][["midphasetime"]][[1]]),
+    Dev = (json_file[["computed"]][["finishphasetime"]][[1]])
   )
 }
 

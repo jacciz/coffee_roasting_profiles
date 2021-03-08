@@ -16,18 +16,17 @@ app_ui <- function(request) {
       tabPanel(
         "Roast profiles",
         sidebarLayout(
-          column(width = 4,
-                 sidebarPanel(htmlOutput("get_filenames_saved")),
-                 sidebarPanel(width = NULL,
+          column(width = 2,
+                 sidebarPanel(width = 12,htmlOutput("get_filenames_saved")),
+                 sidebarPanel(width = 12,
                               formattableOutput("roasting_profile_data")
 
                               # "Dry End: ", textOutput("dry_end", inline = TRUE),br(),
                               # "First Crack: ", textOutput("dry_end2", inline = TRUE)
                  )),
-          mainPanel(width = 8, style="text-align:justify;color:black;background-color:rgb(245,245,245);padding:15px;border-radius:10px",
+          mainPanel(width = 6, style="text-align:justify;color:black;background-color:rgb(245,245,245);padding:15px;border-radius:10px",
                     # plotlyOutput("roast_profile", height = "500px")
                     mod_chart_roasting_profile_ui("roast_profile_chart")
-                    # DT::dataTableOutput("scatter2")
           )
         )
       ),
