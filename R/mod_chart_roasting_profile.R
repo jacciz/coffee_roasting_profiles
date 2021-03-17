@@ -123,6 +123,7 @@ mod_chart_roasting_profile_server <- function(id, json_filename) {
       xend = ~ event_times$dry_time,
       y =  ~ 0,
       yend =  ~ event_times$max_temp,
+      showlegend = FALSE,
       # opacity = 1,
       line = list(
         dash = "dash",
@@ -136,6 +137,7 @@ mod_chart_roasting_profile_server <- function(id, json_filename) {
       xend = ~ event_times$fc_time_start,
       y =  ~ 0,
       yend =  ~ event_times$max_temp,
+      showlegend = FALSE,
       # opacity = 1,
       line = list(
         dash = "dash",
@@ -147,6 +149,7 @@ mod_chart_roasting_profile_server <- function(id, json_filename) {
     plotly::add_segments(
       x = ~ event_times$fc_time_end,
       xend = ~ event_times$fc_time_end,
+      showlegend = FALSE,
       y =  ~ 0,
       yend =  ~ event_times$max_temp,
       # opacity = 1,
@@ -158,17 +161,20 @@ mod_chart_roasting_profile_server <- function(id, json_filename) {
       name = "FC end"
     ) %>%
     # For second_crash_start
-    # add_segments( x = ~first_crack_start,
-    # xend = ~first_crack_start
-    # y =~ 0,
-    # yend=~event_times$max_temp,
-    #               # opacity = 1,
-    #               line = list(dash="dash",
-    #                           color = 'gray80',
-    #                           width = 2), name = "FC start") %>%
+   plotly:: add_segments(
+     x = ~event_times$sc_time_start,
+    xend = ~event_times$sc_time_start,
+    y =~ 0,
+    showlegend = FALSE,
+    yend=~event_times$max_temp,
+                  # opacity = 1,
+                  line = list(dash="dash",
+                              color = '#AAAAAA',
+                              width = 2), name = "FC start") %>%
     plotly::add_segments(
       x = ~ event_times$drop_time,
       xend = ~ event_times$drop_time,
+      showlegend = FALSE,
       y =  ~ 0,
       yend =  ~ event_times$max_temp,
       # opacity = 1,
@@ -234,9 +240,9 @@ mod_chart_roasting_profile_server <- function(id, json_filename) {
         b = 0,
         t = 0
       ),
-      plot_bgcolor = 'rgb(245,245,245)',
-      # make grey background
-      paper_bgcolor = 'rgb(245,245,245)'
+      plot_bgcolor = '#fff',
+      # make white background
+      paper_bgcolor = '#fff'
     ) %>% # Add 3 phases on top
     plotly::add_bars(
       data = phase_times,
@@ -247,7 +253,7 @@ mod_chart_roasting_profile_server <- function(id, json_filename) {
       text =~ name, #?
       orientation = 'h',
       showlegend = FALSE,
-      marker = list(color = colors)
+      marker = list(color = phase_colors)
     ) %>%
     plotly::layout(barmode = 'stack') %>%
     plotly::add_text(data = phase_times, x =~ label_point, text =~ paste0(name,": ",percent,"%"),y = 500, textposition = "right", textfont = list(size = 12, color = "#ffffff"))

@@ -1,6 +1,6 @@
 #' Display data at upload # CHECK IF NO DROP TIME check
 #'
-#' @param json_file json files that was uploaded
+#' @param json_file json file name that was uploaded
 #'
 #' @noRd
 #' @export
@@ -33,7 +33,7 @@ get_special_event_times <- function(json_file) {
     dplyr::mutate(color = ifelse(grepl("^Fan", type_of_event), "#0f1fff", "#ff0f0f"))
 }
 
-#' Get times and temps for graph
+#' Get times and temps for graph. Subract TP_idx from all times.
 #'
 #' @inheritParams get_data_to_display_at_uploade
 #'

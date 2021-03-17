@@ -22,12 +22,14 @@ app_server <- function( input, output, session ) {
   # Read the selected file, opens sql and json
   open_profile_by_filename <-
     reactive({
+      if (length(input$selected_filename) > 5 | input$selected_filename != "") {
       pool::dbReadTable(pool, "roast_profiles") %>% filter(filename == input$selected_filename)
+      }
     })
 
   open_profile_by_filename_json <-
     reactive({
-      if (length(input$selected_filename) > 5 | input$selected_filename!= "") {
+      if (length(input$selected_filename) > 5 | input$selected_filename != "") {
         filename = paste0(".//data-raw/saved/", input$selected_filename)
         json_file <- jsonlite::read_json(filename)
         json_file
@@ -45,30 +47,81 @@ app_server <- function( input, output, session ) {
   # input$uploaded_filenames is the filename
   # }
   output$roasting_profile_data <- renderFormattable({
-    # # Do calculations, finalize numbers and time to make into a table
-    #
-    #     "First crack" = first_crack_start,
-    #     "Roast duration" = duration,
-    #     "Development time" = dev_time,
-    #     "Dev. time ratio" = dev_ratio,
-    #     "End temp.(\u00b0F)" = end_temp
-    #     # "End temp." = paste0(end_temp, "\u00b0F")
-    #   )
-    # print(input$selected_filename)
     if (length(input$selected_filename) > 5 | input$selected_filename != "" | !is.null(input$selected_filename)) {
-    open_profile_by_filename_json() %>% get_event_times() %>%
-      select(-max_temp) %>%
-      mutate_if(is.POSIXct, format, format = "%M:%S") %>%
-      pivot_longer(cols = 1:9, values_to = "data") %>%
-      formattable::formattable(.,
-                               list(
-                                 name = formattable::formatter("span", style = "color:#AAAAAA; font-size:14px; font-weight:bold;"),
-                                 data = formattable::formatter("span", style = "color:grey;")
-                               ))
+    open_profile_by_filename_json() %>%
+        get_event_times() %>%
+        select(fc_time_start, sc_time_start, drop_time) %>%
+        select(`First Crack` = fc_time_start, `Second crack` = sc_time_start, `Roast time` = drop_time) %>%
+        mutate_if(is.POSIXct, format, format = "%M:%S") %>%
+        pivot_longer(cols = everything(), values_to = "data") %>%
+        formattable::formattable(.,
+                                 list(
+                                   name = formattable::formatter("span", style = "color:#AAAAAA; font-size:.8vw; font-weight:bold;border-color:#fff"),
+                                   data = formattable::formatter("span", style = "color:#AAAAAA;font-size:.8vw;border-color:#fff")
+                                 ))
     } else {
       formattable::formattable()
     }
   })
+
+
+  output$roasting_db_data <- gt::render_gt({
+    if (length(input$selected_filename) > 5 |
+        input$selected_filename != "" |
+        !is.null(input$selected_filename)) {
+      open_profile_by_filename() %>%
+        select(-filename, -primary_key) %>%
+        mutate(`Weight loss` = ifelse(is.na(weight_before), 0, round((
+          weight_before * 100 / weight_after
+        ), 1))) %>%
+        mutate_if(is.integer, as.character) %>%
+        mutate_if(is.double, as.character) %>%
+        select(-weight_before, -weight_after) %>%
+        pivot_longer(cols = everything(), values_to = "data") %>%
+        gt::gt() %>%
+        gt::tab_style(
+          style = list(
+            gt::cell_borders(
+              sides = "all",
+              color = "white",
+              style = "solid",
+              weight = gt::px(0)
+            ),
+            gt::cell_text(font = "Verdana", size = "0.8vw")
+          ),
+          locations = gt::cells_body(columns = everything(),
+                                     rows = everything())
+        ) %>%
+        gt::tab_style(gt::cell_text(weight = "bold"),
+                      locations = gt::cells_body(columns = 1)) %>%
+        gt::tab_options(
+          column_labels.hidden = TRUE,
+          table_body.border.bottom.color = "white",
+          table_body.border.top.color = "white"
+        )
+      } else {
+        gt::gt()
+      }
+  })
+  # output$roasting_db_data <- renderFormattable({
+  #   if (length(input$selected_filename) > 5 | input$selected_filename != "" | !is.null(input$selected_filename)) {
+  #     open_profile_by_filename() %>%
+  #       select(-filename, -primary_key) %>%
+  #       mutate(`Weight loss` = ifelse(is.na(weight_before), 0, round((weight_before*100/weight_after),1))) %>%
+  #       mutate_if(is.integer, as.character) %>%
+  #       mutate_if(is.double, as.character) %>%
+  #       select(-weight_before, - weight_after) %>%
+  #       pivot_longer(cols = everything(), values_to = "data") %>%
+  #       formattable::formattable(.,
+  #                                list(
+  #                                  name = formattable::formatter("span", style = "color:#AAAAAA; font-size:14px; font-weight:bold;border-color:#fff"),
+  #                                  data = formattable::formatter("span", style = "color:#AAAAAA;font-size:14px;border-color:#fff")
+  #                                ))
+  #   }
+  #   else {
+  #     formattable::formattable()
+  #   }
+  # })
   #  -------------- The Roast Profile --------------------
 
   #  -------------- The Roast Profile datatable --------------------

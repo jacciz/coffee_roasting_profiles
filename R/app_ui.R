@@ -14,39 +14,81 @@ app_ui <- function(request) {
       "Coffee",
       #  -------------- The Roast Profile Tab --------------------
       tabPanel(
+
         "Roast profiles",
         sidebarLayout(
-          column(width = 2,
-                 sidebarPanel(width = 12,htmlOutput("get_filenames_saved")),
-                 sidebarPanel(width = 12,
-                              formattableOutput("roasting_profile_data")
+          column(
+            width = 3,
+            sidebarPanel(width = 12,
+                         h4("Load file"),
+                         htmlOutput("get_filenames_saved")),
+            sidebarPanel(
+              width = 12,
+              h4("Roast Statistics"),
+              formattableOutput("roasting_profile_data")
+            ),
+            sidebarPanel(
+              width = 12,
+              h4("Roast Summary"),
+              # formattableOutput("roasting_db_data"),
+              gt::gt_output("roasting_db_data"),
+              style = "overflow-x: scroll;"
+            )
 
-                              # "Dry End: ", textOutput("dry_end", inline = TRUE),br(),
-                              # "First Crack: ", textOutput("dry_end2", inline = TRUE)
-                 )),
-          mainPanel(width = 6, style="text-align:justify;color:black;background-color:rgb(245,245,245);padding:15px;border-radius:10px",
-                    # plotlyOutput("roast_profile", height = "500px")
-                    mod_chart_roasting_profile_ui("roast_profile_chart")
+            # "Dry End: ", textOutput("dry_end", inline = TRUE),br(),
+            # "First Crack: ", textOutput("dry_end2", inline = TRUE)
+          ),
+          mainPanel(
+            fluidRow(
+            width = NULL,
+            column(
+              width = 6,
+              shinydashboard::box(style = "text-align:justify;color:black;background-color:#fff;padding:15px;border-radius:10px",
+                                  width = 12, h3("AS1"))
+            ),
+            column(
+              width = 6,
+              shinydashboard::box(style = "text-align:justify;color:black;background-color:#fff;padding:15px;border-radius:10px",
+                                  width = 12, h3("AS2"))
+            ),
+            column(
+              width = 8,
+              style = "text-align:justify;color:black;background-color:#fff;padding:15px;border-radius:10px",
+              tabsetPanel(
+                tabPanel(
+                  "Profile",
+                  mod_chart_roasting_profile_ui("roast_profile_chart")
+                ),
+                tabPanel(
+                  "Tasting",
+                  plotlyOutput("coffee_tasting", height = "600px"),
+                  # textOutput('hover')
+                  textOutput('click')
+                ),
+                tabPanel("Aromas",
+                         plotlyOutput("coffee_flavors", height = "600px"))
+              )
+            )
+          ))
           )
-        )
       ),
       #  -------------- Tasting Tab --------------------
       # Dropdowns
       # htmlOutput("get_data_upload_date"),
       # htmlOutput("get_country"),
       # htmlOutput("get_processing_method")
-      tabPanel("Tasting",
-               fluidRow(
-                 column(
-                   width = 6,
-                   plotlyOutput("coffee_tasting", height = "1000px"),
-                   # textOutput('hover')
-                   textOutput('click')
-                   # textInput("names")
-                 ),
-                 column(width = 6,
-                        plotlyOutput("coffee_flavors", height = "1000px"))
-               )),
+      # tabPanel("Tasting",
+      #          fluidRow(
+      #            column(
+      #              width = 6,
+      #              plotlyOutput("coffee_tasting", height = "1000px"),
+      #              # textOutput('hover')
+      #              textOutput('click')
+      #              # textInput("names")
+      #            ),
+      #            column(width = 6,
+      #                   plotlyOutput("coffee_flavors", height = "1000px"))
+      #          )),
 
       #  -------------- Upload Data Tab --------------------
       tabPanel(
@@ -54,7 +96,7 @@ app_ui <- function(request) {
         shinydashboard::box(
           titlePanel("Input Profile"),
             width = 6,
-            style = "text-align:justify;color:black;background-color:rgb(245,245,245);padding:15px;border-radius:10px",
+            style = "text-align:justify;color:black;background-color:#fff;padding:15px;border-radius:10px",
             # fluidRow(
               # column(3, shiny::dateInput("roast_date", "Roast date", value = Sys.Date(), format = "M d, yyyy", autoclose=TRUE)),
               # input sys date
@@ -82,7 +124,7 @@ app_ui <- function(request) {
         shinydashboard::box(
             # formattableOutput("uploaded_data_preview")
           titlePanel("Summary of uploaded profile"),
-          width = 6, style = "text-align:justify;color:black;background-color:rgb(245,245,245);padding:15px;border-radius:10px",
+          width = 6, style = "text-align:justify;color:black;background-color:#fff;padding:15px;border-radius:10px",
         tableOutput("uploaded_data_preview")
         ))
 
