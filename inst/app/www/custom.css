@@ -8,3 +8,8 @@ body,
 .well {background-color:#fff !important; border: 1px solid #fff !important; padding:15px !important;border-radius:10px }
 
 table {border-color: #fff !important; border-top:#fff !important}
+
+/*.default-sortable.rank-list-container{border:transparent} */
+.default-sortable .rank-list-item {display: inline-block; width:50%;}
+
+

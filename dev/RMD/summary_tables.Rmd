@@ -83,33 +83,36 @@ filedb %>%
                            rows = everything())) %>% 
       gt::tab_style(gt::cell_text(weight = "bold"), locations = gt::cells_body(columns = 1)) %>% 
   gt::tab_options(column_labels.hidden = TRUE, table_body.border.bottom.color= "white", table_body.border.top.color = "white")
-    
-  
+
 ```
 ```{r}
-library(waffle)
-library(extrafont)
-library(emojifont)
-# 
-# font_import()
-# fonts()[grep("Awesome", fonts())]
-# 
-# # 
-# extrafont::font_import()
-# extrafont::loadfonts(device = "win")
+aroma <- c("Sweet","Stale","Grape","Blueberry")
+library(sortable)
+ sortable::bucket_list(
+    header = "",
+    group_name = "bucket_list_tasting",
+    orientation = "vertical",
+    sortable::add_rank_list(
+      text = "",
+      # labels = bucketlistlabels_tasting(),
+      labels = aroma, # must be added one at a time
+      css_id = "rank_list_tasting_css",
+      input_id = "rank_list_tasting"
+      # options = sortable::sortable_options(
+      #   onLoad = htmlwidgets::JS("function (evt) {this.el.addChild(evt.item);}"),
+      #   onSort = htmlwidgets::JS("function (evt) {this.el.addChild(evt.item);}")
+      # )
+    ),
+    sortable::add_rank_list(
+      text = "Drag to Remove",
+      labels = NULL,
+      input_id = "remove_tasting",
+      options = sortable::sortable_options(
+        onAdd = htmlwidgets::JS("function (evt) {this.el.removeChild(evt.item);}")
+      )
+    )
+  )
 
-emojifont::load.fontawesome(font = "fontawesome-webfont.ttf")
-spec <- table(iris$Species)
-waffle::waffle(spec, use_glyph = "fa fa-music")
-emojifont::load.fontawesome(font = "C:/Users/jacci/Downloads/fontawesome-free-5.15.2-desktop/fontawesome-free-5.15.2-desktop/otfs/Font Awesome 5 Brands-Regular-400.otf")
-```
-
-```{r}
-library(showtext)
-font_add(family = "FontAwesome5Free-Solid", regular = "C:/Users/jacci/AppData/Local/Microsoft/Windows/Fonts/fa-solid-900.ttf")
-font_add(family = "FontAwesome5Free-Regular",regular = "C:/Users/jacci/AppData/Local/Microsoft/Windows/Fonts/fa-regular-400.ttf")
-font_add(family = "FontAwesome5Brands-Regular",regular = "C:/Users/jacci/AppData/Local/Microsoft/Windows/Fonts/fa-brands-400.ttf")
-showtext_auto()
 ```
 
 

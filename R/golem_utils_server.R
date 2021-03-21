@@ -86,7 +86,7 @@ addHoverBehavior <- "function(el, x){
     Shiny.onInputChange('hover_data', infotext)
   })
 }"
-# Same but with capturing the click data
+# Same but with capturing the click data. ALso disables animation.
 addClickBehavior <- "function(el, x){
   el.on('plotly_click', function(data){
     var infotext = data.points.map(function(d){
@@ -95,5 +95,25 @@ addClickBehavior <- "function(el, x){
     });
     console.log(infotext)
     Shiny.onInputChange('click_data', infotext)
+    gd.on('plotly_sunburstclick', () => false)
   })
 }"
+
+# disable_sunburst_animation <-
+# "gd => {
+#   gd.on('plotly_sunburstclick', () => false)
+# }"
+#
+# "function(el, x){
+#   el.on('plotly_click', function(data){
+#     var infotext = data.points.map(function(d){
+#       console.log(d)
+#       return (d.label);
+#     });
+#     console.log(infotext)
+#     Shiny.onInputChange('click_data', infotext)
+#   })
+# }"
+
+
+

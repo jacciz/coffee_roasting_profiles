@@ -19,6 +19,7 @@ Imports:
     shinydashboard,
     shinyWidgets,
     shinythemes,
+    sortable,
     plotly,
     formattable,
     lubridate,

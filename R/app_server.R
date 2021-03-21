@@ -70,13 +70,32 @@ app_server <- function( input, output, session ) {
         input$selected_filename != "" |
         !is.null(input$selected_filename)) {
       open_profile_by_filename() %>%
-        select(-filename, -primary_key) %>%
-        mutate(`Weight loss` = ifelse(is.na(weight_before), 0, round((
-          weight_before * 100 / weight_after
-        ), 1))) %>%
-        mutate_if(is.integer, as.character) %>%
-        mutate_if(is.double, as.character) %>%
-        select(-weight_before, -weight_after) %>%
+        select(-filename,
+               -primary_key,
+               -roast_date,
+               -unit_of_measure,
+               -cupping_notes,
+               -aromatic_notes,
+               -weight_before,
+               -weight_after,
+               -roast_notes,
+               -taste_notes) %>%
+        select(`Date uploaded` = date_uploaded,
+               `Roaster name` = name,
+               `Roast machine` = roast_machine,
+               `Farm` = roast_farm,
+               Country = country,
+               Region = region,
+               `Quality/Grade` = quality,
+               `Processing method` = processing_method,
+               Variety = variety
+               ) %>%
+        # mutate(`Weight loss` = ifelse(is.na(weight_before), 0, round((
+        #   weight_before * 100 / weight_after
+        # ), 1))) %>%
+        # mutate_if(is.integer, as.character) %>%
+        # mutate_if(is.double, as.character) %>%
+        # select(-weight_before, -weight_after) %>%
         pivot_longer(cols = everything(), values_to = "data") %>%
         gt::gt() %>%
         gt::tab_style(
@@ -99,9 +118,9 @@ app_server <- function( input, output, session ) {
           table_body.border.bottom.color = "white",
           table_body.border.top.color = "white"
         )
-      } else {
-        gt::gt()
-      }
+    } else {
+      gt::gt()
+    }
   })
   # output$roasting_db_data <- renderFormattable({
   #   if (length(input$selected_filename) > 5 | input$selected_filename != "" | !is.null(input$selected_filename)) {
@@ -129,7 +148,8 @@ app_server <- function( input, output, session ) {
     input$hover_data
   })
   output$click <- renderText({
-    input$click_data
+    # input$click_data
+    r$click
   })
 
   # Accumulate flavor notes when clicked - https://mastering-shiny.org/reactivity-components.html
@@ -144,19 +164,44 @@ app_server <- function( input, output, session ) {
   r <- reactiveValues(click = character())
   observeEvent(input$click_data, {
     # print(input$click_data) # works
-    r$click <- union(input$click_data, r$click)
-    # print(r$click)# works
-    # updateTextInput(session, "click_data", value = "")
+    # r$click <- union(input$click_data, r$click) # union so there's no duplicates
+    r$click <- c(input$click_data, r$click) # want duplicates in case one gets deleted,
+    # but can't click same twice in a row
+    # r$click <- input$click_data
+    print(r$click)
   })
-
+  # bucketlistlabels_tasting()
   # output$click <- renderText(click())
-
-
+  output$bucketlist_tasting <- renderUI({
+  sortable::bucket_list(
+    header = "",
+    group_name = "bucket_list_tasting",
+    orientation = "horizontal",
+    sortable::add_rank_list(
+      text = "",
+      # labels = bucketlistlabels_tasting(),
+      labels = r$click, # must be added one at a time
+      input_id = "rank_list_tasting"
+      # options = sortable::sortable_options(
+      #   onLoad = htmlwidgets::JS("function (evt) {this.el.addChild(evt.item);}"),
+      #   onSort = htmlwidgets::JS("function (evt) {this.el.addChild(evt.item);}")
+      # )
+    ),
+    sortable::add_rank_list(
+      text = "Drag to Remove",
+      labels = NULL,
+      input_id = "remove_tasting",
+      options = sortable::sortable_options(
+        onAdd = htmlwidgets::JS("function (evt) {this.el.removeChild(evt.item);}")
+      )
+    )
+  )
+  })
   #  -------------- Coffee Cupping Sunburst --------------------
   output$coffee_tasting <- renderPlotly2({
     coffee_cupping_tasting <- coffee_cupping_tasting %>% mutate(new_label =paste0("<b>",end_name,": ", "</b>",stringr::str_wrap(labels, width = 30)))
     # coffee_tasting$name = rownames(coffee_tasting)
-    p <- coffee_cupping_tasting %>% plot_ly() %>% add_trace(
+    coffee_cupping_tasting %>% plot_ly() %>% add_trace(
       type = 'sunburst',
       ids = coffee_cupping_tasting$ids,
       labels = coffee_cupping_tasting$end_name,
@@ -175,8 +220,10 @@ app_server <- function( input, output, session ) {
           b = 0,
           t = 0
         )) %>%
-      as_widget(p) %>%
-      htmlwidgets::onRender(addClickBehavior)#onRender(addHoverBehavior)
+      # as_widget(p) %>% #?
+      htmlwidgets::onRender(addClickBehavior)# %>%
+      # htmlwidgets::onRender(disable_sunburst_animation)
+      #onRender(addHoverBehavior)
   })
   #  -------------- Coffee Tasting Sunburst --------------------
   output$coffee_flavors <- renderPlotly({
@@ -240,14 +287,14 @@ app_server <- function( input, output, session ) {
   fields_to_update_for_profile <-
     c(
         # "primary_key",
-        # "name",
+        "name",
         "roast_machine",
         "roast_farm",
         "country",
         "region",
         "quality",
-        "processing_method",
-        "roast_notes"
+        "processing_method"
+        # "roast_notes"
         )
 
   # Collect the form data and save it into the "data" list variable
