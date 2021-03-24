@@ -1,8 +1,10 @@
 #' Display data at upload # CHECK IF NO DROP TIME check
 #'
-#' @param json_file json file name that was uploaded
+#' Grabs certain fields for display.
 #'
-#' @noRd
+#' @param json_file json file that is read
+#'
+#' @return df in wide format
 #' @export
 get_data_to_display_at_upload <- function(json_file) {
   weight_loss_var = ifelse(is.null(json_file[["computed"]][["weight_loss"]]), 0, json_file[["computed"]][["weight_loss"]])
@@ -17,9 +19,12 @@ get_data_to_display_at_upload <- function(json_file) {
   )
 }
 
-#' Get special events and times. Subract TP_idx from all times.
+#' Get special events and times
+#'
+#' It also subtracts TP_idx from all times so start time = charge time.
 #'
 #' @inheritParams get_data_to_display_at_upload
+#'
 #' @export
 get_special_event_times <- function(json_file) {
   time_index = as.numeric(json_file[["computed"]][["TP_idx"]][[1]]) # When charge time starts
@@ -28,30 +33,30 @@ get_special_event_times <- function(json_file) {
     tibble::tibble(time_of_event = as.numeric(json_file[["specialevents"]]),
                    type_of_event = as.character(json_file[["specialeventsStrings"]]))
   tib %>%
-    dplyr::mutate(time_of_event = time_of_event - time_index) %>%
-    dplyr::filter(time_of_event > 0) %>%
-    dplyr::mutate(color = ifelse(grepl("^Fan", type_of_event), "#0f1fff", "#ff0f0f"))
+    dplyr::mutate(time_of_event = .data$time_of_event - time_index) %>%
+    dplyr::filter(.data$time_of_event > 0) %>%
+    dplyr::mutate(color = ifelse(grepl("^Fan", .data$type_of_event), "#0f1fff", "#ff0f0f"))
 }
 
-#' Get times and temps for graph. Subract TP_idx from all times.
+#' Get times and temps for graph. Subract TP_idx from all times
 #'
-#' @inheritParams get_data_to_display_at_uploade
+#' It also subracts TP_idx from all times so start time = charge time.
 #'
-#' @noRd
+#' @inheritParams get_data_to_display_at_upload
+#'
 #' @export
 get_data_of_times_temps <- function(json_file) {
   time_index = as.numeric(json_file[["computed"]][["TP_idx"]][[1]]) # When charge time starts
   tib <- tibble::tibble(time = as.numeric(json_file[["timex"]]),
          ET = as.character(json_file[["temp1"]]),
          BT = as.character(json_file[["temp2"]]))
-  tib %>% dplyr::mutate(time = time - time_index) %>% dplyr::filter(time > 0)
+  tib %>% dplyr::mutate(time = .data$time - time_index) %>% dplyr::filter(.data$time > 0)
 }
 
 #' Get tp, dry, fc, sc, drop times
 #'
 #' @inheritParams get_data_to_display_at_upload
 #'
-#' @noRd
 #' @export
 get_event_times <- function(json_file) {
   tibble::tibble(
@@ -64,18 +69,17 @@ get_event_times <- function(json_file) {
     sc_time_end = ifelse(is.null(json_file[["computed"]][["SCe_time"]][[1]]), 0, json_file[["computed"]][["SCe_time"]][[1]]),
     drop_time = lubridate::as_datetime(json_file[["computed"]][["DROP_time"]][[1]]),
     max_temp = 500,
-    development_time = drop_time - fc_time_start
-  ) %>% dplyr::mutate(fc_time_start = lubridate::as_datetime(fc_time_start),
-                      fc_time_end = lubridate::as_datetime(fc_time_end),
-                      sc_time_start = lubridate::as_datetime(sc_time_start),
-                      sc_time_end = lubridate::as_datetime(sc_time_end))
+    development_time = .data$drop_time - .data$fc_time_start
+  ) %>% dplyr::mutate(fc_time_start = lubridate::as_datetime(.data$fc_time_start),
+                      fc_time_end = lubridate::as_datetime(.data$fc_time_end),
+                      sc_time_start = lubridate::as_datetime(.data$sc_time_start),
+                      sc_time_end = lubridate::as_datetime(.data$sc_time_end))
 }
 
 #' Get 3 phase lengths
 #'
 #' @inheritParams get_data_to_display_at_upload
 #'
-#' @noRd
 #' @export
 get_data_of_phase_times <- function(json_file) {
   tibble::tibble(

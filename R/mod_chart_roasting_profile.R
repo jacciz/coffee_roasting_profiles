@@ -41,9 +41,9 @@ mod_chart_roasting_profile_server <- function(id, json_filename) {
 
       phase_times = get_data_of_phase_times(json_file) %>%
         tidyr::pivot_longer(everything(), values_to = "phase_time") %>%
-        dplyr::mutate(name = factor(name, levels = c("Dry", "Mid", "Dev"))) %>% # add levels
-        dplyr::mutate(percent = as.character(round(phase_time * 100 / sum(phase_time),1)), # Get phase percent
-                      phase_time_mid = cumsum(phase_time)) %>% # Get midpoint
+        dplyr::mutate(name = factor(.data$name, levels = c("Dry", "Mid", "Dev"))) %>% # add levels
+        dplyr::mutate(percent = as.character(round(.data$phase_time * 100 / sum(.data$phase_time),1)), # Get phase percent
+                      phase_time_mid = cumsum(.data$phase_time)) %>% # Get midpoint
         dplyr::mutate_if(is.integer, lubridate::as_datetime) %>% # Make into datetime so we can chart it
         dplyr::mutate_if(is.numeric, lubridate::as_datetime)
 
@@ -64,18 +64,6 @@ mod_chart_roasting_profile_server <- function(id, json_filename) {
   # FC, phase times
   event_times <-
     get_event_times(json_file)
-
-  # # This needs data from times
-  # add_times_to_delta <-
-  #   function(cleaned_deltas,
-  #            time_list = times$time) {
-  #     time_list = times$time # 472
-  #     time_length = length(time_list)
-  #     cleaned_deltas %>% dplyr::slice_tail(n = time_length) %>% dplyr::mutate(timex = time_list)
-  #   }
-  #
-  # # Deltas ready to be plotted
-  # deltas_clean = add_times_to_delta(cleaned_deltas)
 
   plotly::plot_ly(
     data = times,

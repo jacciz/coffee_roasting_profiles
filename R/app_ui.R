@@ -22,7 +22,7 @@ app_ui <- function(request) {
             sidebarPanel(width = 12,
                          tags$span(
                            HTML(
-                             '<img src="www/noun_Download file_1528035.png" style="width:24px;height:24px;">
+                             '<img src="www/noun_Downloadfile_1528035.png" style="width:24px;height:24px;">
                   </i><h4 style="display:inline-block;">&ensp;Load File</h4>'
                            )),
                          htmlOutput("get_filenames_saved")),
@@ -37,7 +37,7 @@ app_ui <- function(request) {
 
               tags$span(
                 HTML(
-                  '<img src="www/noun_Coffee_2594042.png" style="width:24px;height:24px;">
+                  '<img src="www/noun_Coffee.png" style="width:24px;height:24px;">
                   </i><h4 style="display:inline-block;">&ensp;Roast Summary</h4>'
                 )),
 
@@ -62,7 +62,7 @@ app_ui <- function(request) {
             #       # h4("Tasting Notes"),
             #       tags$span(
             #         HTML(
-            #           '<img src="www/noun_sunburst plot_2797256.png" style="width:24px;height:24px;">
+            #           '<img src="www/noun_sunburstplot_2797256.png" style="width:24px;height:24px;">
             #       </i><h4 style="display:inline-block;">&ensp;Tasting Notes</h4>'
             #         )),
             #
@@ -122,7 +122,7 @@ app_ui <- function(request) {
             #     # shinydashboard::box(style = "text-align:justify;color:black;background-color:#fff;padding-bottom:15px;border-radius:10px",
             #     #                     width = 12,    tags$span(
             #     #                       HTML(
-            #     #                         '<img src="www/noun_hot cup_1885847.png" style="width:24px;height:24px;">
+            #     #                         '<img src="www/noun_hotcup_1885847.png" style="width:24px;height:24px;">
             #     #   </i><h4 style="display:inline-block;">&ensp;Aroma Notes</h4>'
             #     #                       )))
             #   )
@@ -141,7 +141,7 @@ app_ui <- function(request) {
                   tabPanel(
                     tagList(tags$span(
                       HTML(
-                        '<img src="www/noun_sunburst plot_2797256.png" style="width:24px;height:24px;"></i>'
+                        '<img src="www/noun_sunburstplot_2797256.png" style="width:24px;height:24px;"></i>'
                       )
                     ), "Tasting"),
                     # "Tasting",

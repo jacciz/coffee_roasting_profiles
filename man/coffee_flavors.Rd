@@ -3,22 +3,14 @@
 \docType{data}
 \name{coffee_flavors}
 \alias{coffee_flavors}
-\title{Coffee cupping flavors.#'}
+\title{Coffee cupping flavors.}
 \format{
-A data frame with 110 rows and 6 variables:
-\describe{
-  \item{end_name}{name of taste}
-  \item{labels}{description of tastes}
-  ...
-}
-}
-\source{
-\url{}
+A data frame with 110 rows and 6 variables
 }
 \usage{
 coffee_flavors
 }
 \description{
-Coffee cupping flavors.#'
+Coffee cupping flavors.
 }
 \keyword{datasets}

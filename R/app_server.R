@@ -50,8 +50,8 @@ app_server <- function( input, output, session ) {
     if (length(input$selected_filename) > 5 | input$selected_filename != "" | !is.null(input$selected_filename)) {
     open_profile_by_filename_json() %>%
         get_event_times() %>%
-        select(fc_time_start, sc_time_start, drop_time) %>%
-        select(`First Crack` = fc_time_start, `Second crack` = sc_time_start, `Roast time` = drop_time) %>%
+        # select(.data$fc_time_start, .data$sc_time_start, .data$drop_time) %>%
+        select(`First Crack` = .data$fc_time_start, `Second crack` = .data$sc_time_start, `Roast time` = .data$drop_time) %>%
         mutate_if(is.POSIXct, format, format = "%M:%S") %>%
         pivot_longer(cols = everything(), values_to = "data") %>%
         formattable::formattable(.,
@@ -70,25 +70,25 @@ app_server <- function( input, output, session ) {
         input$selected_filename != "" |
         !is.null(input$selected_filename)) {
       open_profile_by_filename() %>%
-        select(-filename,
-               -primary_key,
-               -roast_date,
-               -unit_of_measure,
-               -cupping_notes,
-               -aromatic_notes,
-               -weight_before,
-               -weight_after,
-               -roast_notes,
-               -taste_notes) %>%
-        select(`Date uploaded` = date_uploaded,
-               `Roaster name` = name,
-               `Roast machine` = roast_machine,
-               `Farm` = roast_farm,
-               Country = country,
-               Region = region,
-               `Quality/Grade` = quality,
-               `Processing method` = processing_method,
-               Variety = variety
+        select(-.data$filename,
+               -.data$primary_key,
+               -.data$roast_date,
+               -.data$unit_of_measure,
+               -.data$cupping_notes,
+               -.data$aromatic_notes,
+               -.data$weight_before,
+               -.data$weight_after,
+               -.data$roast_notes,
+               -.data$taste_notes) %>%
+        select(`Date uploaded` = .data$date_uploaded,
+               `Roaster name` = .data$name,
+               `Roast machine` = .data$roast_machine,
+               `Farm` = .data$roast_farm,
+               Country = .data$country,
+               Region = .data$region,
+               `Quality/Grade` = .data$quality,
+               `Processing method` = .data$processing_method,
+               Variety = .data$variety
                ) %>%
         # mutate(`Weight loss` = ifelse(is.na(weight_before), 0, round((
         #   weight_before * 100 / weight_after
@@ -168,7 +168,7 @@ app_server <- function( input, output, session ) {
     r$click <- c(input$click_data, r$click) # want duplicates in case one gets deleted,
     # but can't click same twice in a row
     # r$click <- input$click_data
-    print(r$click)
+    # print(r$click)
   })
   # bucketlistlabels_tasting()
   # output$click <- renderText(click())
@@ -199,7 +199,8 @@ app_server <- function( input, output, session ) {
   })
   #  -------------- Coffee Cupping Sunburst --------------------
   output$coffee_tasting <- renderPlotly2({
-    coffee_cupping_tasting <- coffee_cupping_tasting %>% mutate(new_label =paste0("<b>",end_name,": ", "</b>",stringr::str_wrap(labels, width = 30)))
+    base::get("coffee_cupping_tasting")
+    coffee_cupping_tasting <- coffee_cupping_tasting %>% mutate(new_label = paste0("<b>", .data$end_name,": ", "</b>",stringr::str_wrap(labels, width = 30)))
     # coffee_tasting$name = rownames(coffee_tasting)
     coffee_cupping_tasting %>% plot_ly() %>% add_trace(
       type = 'sunburst',
@@ -208,7 +209,6 @@ app_server <- function( input, output, session ) {
       parents = coffee_cupping_tasting$parents,
       text = ~coffee_cupping_tasting$new_label,
       textinfo = 'label',  # What shows on the chart
-      hovertemplate = '%{text}',
       domain = list(column = 1),
       maxdepth = 3,
       insidetextorientation = 'radial'
@@ -227,6 +227,7 @@ app_server <- function( input, output, session ) {
   })
   #  -------------- Coffee Tasting Sunburst --------------------
   output$coffee_flavors <- renderPlotly({
+    base::get("coffee_flavors")
     coffee_flavors %>% plot_ly() %>% add_trace(
       type = 'sunburst',
       ids = coffee_flavors$ids,
@@ -280,7 +281,7 @@ app_server <- function( input, output, session ) {
   # })
 
   # get text from roast update tab
-  output$value <- renderPrint(input$roast_machine)
+  # output$value <- renderPrint(input$roast_machine)
   #  -------------- Input Roast Data from file/user --------------------
 
   # Define fields we want to save on the form, this is based on the textInput IDs

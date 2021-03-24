@@ -1,22 +1,14 @@
-#' SQL Load data
-#'
-#' @param fields columns to select
-#' @param table table in SQL db
-#' @param WhereCls delete
-#'
-#' @noRd
-#'
-loadData <- function(fields,
-                     table,
-                     WhereCls = '') {
-  # Construct the fetching query, pool cannot use dbSendQuery
-  if (WhereCls == '') {
-    dataDB <- pool %>% dbplyr::tbl(table) %>% dplyr::select(dplyr::all_of(fields))
-  }
-  else {
-    # dataDB <- pool %>% tbl(table) %>% filter(Org_Name == WhereCls)
-  }
-}
+# loadData <- function(fields,
+#                      table,
+#                      WhereCls = '') {
+#   # Construct the fetching query, pool cannot use dbSendQuery
+#   if (WhereCls == '') {
+#     dataDB <- pool %>% dbplyr::tbl(table) %>% dplyr::select(dplyr::all_of(fields))
+#   }
+#   else {
+#     # dataDB <- pool %>% tbl(table) %>% filter(Org_Name == WhereCls)
+#   }
+# }
 
 
 
@@ -29,8 +21,8 @@ save_data_in_roast_profiles <-
   function(data, table) { # Data is matched via ID_Key
     # print(get_where_clause())
     if (length(data != 0)) { # verify there is data to be changed
-      if (input$primary_key == 0 |
-          input$primary_key == '') {   # If no primary key, insert record instead
+      if (.env$input[["primary_key"]] == 0 |
+          .env$input[["primary_key"]] == '') {   # If no primary key, insert record instead
         sql <- paste0(
           "INSERT INTO ?table (",
           paste0(names(data), collapse = ", "),
@@ -54,7 +46,7 @@ save_data_in_roast_profiles <-
         query <- pool::sqlInterpolate(pool, sql, .dots = c(
           list(table = table),
           as.list(data),
-          list(idVal = input$primary_key)
+          list(idVal = .env$input[["primary_key"]])
         ))
         record_status <- "updated."
       }

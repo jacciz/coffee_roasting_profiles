@@ -2,10 +2,13 @@
 % Please edit documentation in R/fct_extract_from_json.R
 \name{get_special_event_times}
 \alias{get_special_event_times}
-\title{Get special events and times. Subract TP_idx from all times.}
+\title{Get special events and times}
 \usage{
 get_special_event_times(json_file)
 }
+\arguments{
+\item{json_file}{json file that is read}
+}
 \description{
-Get special events and times. Subract TP_idx from all times.
+It also subtracts TP_idx from all times so start time = charge time.
 }

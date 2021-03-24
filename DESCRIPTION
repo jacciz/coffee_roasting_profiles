@@ -2,11 +2,13 @@ Package: coffeeroastingprofiles
 Title: Coffee roasting profiles
 Version: 0.0.0.9000
 Authors@R: person('Jacci', 'Ziebert', email = 'jacciziebert@gmail.com', role = c('cre', 'aut'))
-Description: A comparison of cupping notes, profiles
-License: What license is it under?
+Description: A comparison of cupping notes, profiles.
+License: MIT + file LICENSE
 Imports: 
     config,
+    dbplyr,
     dplyr,
+    formattable,
     golem,
     shiny,
     processx,
@@ -15,23 +17,26 @@ Imports:
     glue,
     gt,
     htmltools,
-    thinkr,
-    shinydashboard,
-    shinyWidgets,
-    shinythemes,
-    sortable,
-    plotly,
-    formattable,
-    lubridate,
-    shinyFeedback,
-    RSQLite,
-    pool,
-    reticulate,
-    stringr,
-    tidyr,
-    utils,
+    htmlwidgets,
+    jsonlite,
     kableExtra,
-    pkgload
+    lubridate,
+    plotly,
+    pkgload,
+    pool,
+    RSQLite,
+    reticulate,
+    rlang,
+    shinydashboard,
+    shinyFeedback,
+    shinythemes,
+    shinyWidgets,
+    sortable,
+    stringr,
+    thinkr,
+    tibble,
+    tidyr,
+    utils
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1

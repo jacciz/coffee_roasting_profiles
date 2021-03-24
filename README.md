@@ -1,0 +1,35 @@
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+# coffeeroastingprofiles
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+## About the project
+
+This app uses outputs from Artisan, an open-source software that assists
+coffee roasters record, analyze, and control roast profiles. It imports
+.alog files and displays roast curves. It uses Python code from Artisan
+to chart rate of rise (RoR) curves. There will soon be a cupping tab
+along with a tab to view past roasts. I hope to have a place where
+others can also import and view their roasts.
+
+This app is a work in progress.
+
+## Demo
+
+View it [here](https://jacciz.shinyapps.io/coffee_roasting/)
+
+Built With
+
+-   [R Shiny](https://shiny.rstudio.com/)
+
+## Setup
+
+Data is stored in a SQLite database which offers only local storage.
+Roast profiles are dumped in a folder after they are uploaded.
+
+## Author
+
+Jacci Ziebert - (<jacciziebert@gmail.com>)

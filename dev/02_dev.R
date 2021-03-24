@@ -57,6 +57,11 @@ usethis::use_appveyor()
 # go to dev/03_deploy.R
 rstudioapi::navigateToFile("dev/03_deploy.R")
 
+## Other ----
+devtools::document() # update roxygen
+devtools::build_readme()
+usethis::use_mit_license()
+
 # Resources:
 # Remote file servers: https://rpubs.com/berdaniera/shinyshop-remotedata
 

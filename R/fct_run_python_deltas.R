@@ -5,7 +5,7 @@
 #' @param filename_to_open complete file location and filename 'folder/file.json'
 #' @noRd
 get_python_deltas <- function(filename_to_open) {
-  require(reticulate)
+  requireNamespace(reticulate)
   reticulate::source_python(".//inst/app/www/get_ror_curves.py")
   py$get_ror_curves(file_raw = filename_to_open)
 }
@@ -17,7 +17,7 @@ get_python_deltas <- function(filename_to_open) {
 #' @param raw_deltas pandas df
 #' @noRd
 clean_deltas_from_python <- function(raw_deltas) {
-  deltas = raw_deltas %>% dplyr::mutate_if(is.list, as.character)
+  deltas <- raw_deltas %>% dplyr::mutate_if(is.list, as.character)
   # Make all nulls into NA
   deltas[deltas == "NULL"] <- NA
   deltas[deltas == "NaN"] <- NA
