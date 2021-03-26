@@ -10,8 +10,6 @@
 #   }
 # }
 
-
-
 #' Save data to SQL table depending
 #' @param data all input data to save
 #' @param table table
@@ -58,13 +56,13 @@ save_data_in_roast_profiles <-
     record_status # Return if either inserted or updated
   }
 
-#' Upload data
+#' Update profile .alog data
 #'
 #' @param data data selected to upload
 #' @param table table to insert data into
 #'
 #' @noRd
-upload_roast_profiles <-
+update_roast_profiles <-
   function(data, table) {
 
     if (length(data != 0)) { # verify there is data to be changed
@@ -82,3 +80,17 @@ upload_roast_profiles <-
     }
     record_status <- "inserted."
   }
+
+
+#' Saves json df as a json
+#'
+#' @param json_as_df opened profile df
+#' @param filename name of file
+#'
+#' @noRd
+save_profile_json <- function(json_as_df, filename){
+  tosave <- jsonlite::toJSON(json_as_df)
+  write(tosave, paste0("data-raw/saved/",filename))
+}
+# tosave <- jsonlite::toJSON(open_profile_by_filename_json())
+# write(tosave, paste0("data-raw/saved/",saved_filename))

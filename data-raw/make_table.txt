@@ -1,11 +1,7 @@
 CREATE TABLE roast_profiles(
     [primary_key] INTEGER NOT NULL PRIMARY KEY,
     [date_uploaded] [DATE] NULL,
-    [roast_date] [DATE] NULL,
     [name] NVARCHAR(50) NULL,
-    [weight_before] NUMERIC(8,2) NULL,
-    [weight_after] NUMERIC(8,2) NULL,
-    [unit_of_measure] NVARCHAR(10) NULL,
     [roast_machine] NVARCHAR(30) NULL,
     [roast_farm] NVARCHAR(50) NULL,
     [country] NVARCHAR(50) NULL,
@@ -13,9 +9,5 @@ CREATE TABLE roast_profiles(
     [quality] NVARCHAR(15) NULL,
     [processing_method] NVARCHAR(30) NULL,
     [variety] NVARCHAR(50) NULL,
-    [roast_notes] NVARCHAR(200) NULL,
-    [filename] NVARCHAR(50) NULL,
-    [cupping_notes] NVARCHAR(200) NULL,
-    [aromatic_notes] NVARCHAR(200) NULL,
-    [taste_notes] NVARCHAR(200) NULL
+    [filename] NVARCHAR(50) NULL
 );

@@ -42,8 +42,9 @@ app_ui <- function(request) {
                 )),
 
               # formattableOutput("roasting_db_data"),
-              gt::gt_output("roasting_db_data"),
-              style = "overflow-x: scroll;"
+              # gt::gt_output("roasting_db_data")
+              mod_chart_summary_table_template_ui("roasting_db_data")
+              # style = "overflow-x: scroll;"
             )
 
             # "Dry End: ", textOutput("dry_end", inline = TRUE),br(),
@@ -212,7 +213,8 @@ app_ui <- function(request) {
             # formattableOutput("uploaded_data_preview")
           titlePanel("Summary of uploaded profile"),
           width = 6, style = "text-align:justify;color:black;background-color:#fff;padding:15px;border-radius:10px",
-        tableOutput("uploaded_data_preview")
+        # tableOutput("uploaded_data_preview")
+        mod_chart_summary_table_template_ui("uploaded_data_preview")
         ))
 
       #  -------------- More Tabs -dropdown --------------------

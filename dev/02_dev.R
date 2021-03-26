@@ -19,7 +19,7 @@ usethis::use_package( "shinydashboardPlus")
 
 ## Add modules ----
 ## Create a module infrastructure in R/
-golem::add_module( name = "chart_roasting_profile" ) # Name of the module
+golem::add_module( name = "chart_summary_table_template" ) # Name of the module
 golem::add_module( name = "name_of_module2" ) # Name of the module
 
 ## Add helper functions ----
@@ -89,3 +89,22 @@ usethis::use_mit_license()
 # more testing https://speakerdeck.com/colinfay/workshop-building-successful-shiny-apps-with-golem?slide=130
 # Performance: https://mastering-shiny.org/performance.html
 
+
+
+# CSS AND ICONS
+# https://www.w3schools.com/css/ a resource for CSS
+# https://codepen.io/sosuke/pen/Pjoqqp to get FILTER colors for SVG (like hexbin) - plug in color and scroll down
+# https://icons8.com/ free icons - recolor (#8F9BB3) before download at 60pxPNG
+
+
+############ ADD MODULE ###########
+# Put this in the actual app to reference these modules
+# UI: crsh_svr_mth_ui("crsh_svr_mth")
+# Server: crsh_svr_mth_server("crsh_svr_mth", filtered_crashes())
+
+# To add a new chart - use this
+# crsh_svr_mth_server <- function(id, crash_df()) {
+#   moduleServer(id, function(input, output, session) {
+#     plotly stuff goes here
+#   })
+#   }

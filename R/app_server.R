@@ -5,7 +5,6 @@
 #' @import shiny lubridate plotly formattable dplyr stringr tidyr
 #' @noRd
 app_server <- function( input, output, session ) {
-  # List the first level callModules here
 
     # ------------------------- Reactives  --------------------------------------
   #
@@ -13,7 +12,16 @@ app_server <- function( input, output, session ) {
   #     reactive({
   #         dbReadTable(pool, "roast_profiles") %>% filter(country == input$country)# filter(Org_Name %in% input$health_clinic)
   #     })
+  valid_filename <-
+    reactive({
+      if (base::exists("input$selected_filename")) {
+        input$selected_filename
+      } else {
+        # NULL
+        "Angola--2021-03-05-18-06-43.json" # open this as default
+      }
 
+    })
   get_profile_database <- # Based on country for now
       reactive({
           pool::dbReadTable(pool, "roast_profiles") #%>% filter(country == input$country)# filter(Org_Name %in% input$health_clinic)
@@ -22,125 +30,53 @@ app_server <- function( input, output, session ) {
   # Read the selected file, opens sql and json
   open_profile_by_filename <-
     reactive({
-      if (length(input$selected_filename) > 5 | input$selected_filename != "") {
-      pool::dbReadTable(pool, "roast_profiles") %>% filter(filename == input$selected_filename)
-      }
+      pool::dbReadTable(pool, "roast_profiles") %>% filter(filename == valid_filename())
     })
 
   open_profile_by_filename_json <-
     reactive({
-      if (length(input$selected_filename) > 5 | input$selected_filename != "") {
-        filename = paste0(".//data-raw/saved/", input$selected_filename)
+        filename = paste0(".//data-raw/saved/", valid_filename())
         json_file <- jsonlite::read_json(filename)
         json_file
-      }
     })
 
   #  -------------- The Roast Profile Analysis Line Chart --------------------
  observeEvent(input$selected_filename, {
-   if (length(input$selected_filename) > 5 | input$selected_filename!= "") {
-  mod_chart_roasting_profile_server("roast_profile_chart", input$selected_filename )# open_profile_by_filename()
-
-     }
+   # if (length(input$selected_filename) > 5 | input$selected_filename != "") {
+  mod_chart_roasting_profile_server("roast_profile_chart", valid_filename())# open_profile_by_filename()
+     # }
      })
-  # output$summary_profile_data <- function(){
-  # input$uploaded_filenames is the filename
-  # }
-  output$roasting_profile_data <- renderFormattable({
-    if (length(input$selected_filename) > 5 | input$selected_filename != "" | !is.null(input$selected_filename)) {
-    open_profile_by_filename_json() %>%
-        get_event_times() %>%
-        # select(.data$fc_time_start, .data$sc_time_start, .data$drop_time) %>%
-        select(`First Crack` = .data$fc_time_start, `Second crack` = .data$sc_time_start, `Roast time` = .data$drop_time) %>%
-        mutate_if(is.POSIXct, format, format = "%M:%S") %>%
-        pivot_longer(cols = everything(), values_to = "data") %>%
-        formattable::formattable(.,
-                                 list(
-                                   name = formattable::formatter("span", style = "color:#AAAAAA; font-size:.8vw; font-weight:bold;border-color:#fff"),
-                                   data = formattable::formatter("span", style = "color:#AAAAAA;font-size:.8vw;border-color:#fff")
-                                 ))
-    } else {
-      formattable::formattable()
-    }
-  })
 
-
-  output$roasting_db_data <- gt::render_gt({
-    if (length(input$selected_filename) > 5 |
-        input$selected_filename != "" |
-        !is.null(input$selected_filename)) {
-      open_profile_by_filename() %>%
-        select(-.data$filename,
-               -.data$primary_key,
-               -.data$roast_date,
-               -.data$unit_of_measure,
-               -.data$cupping_notes,
-               -.data$aromatic_notes,
-               -.data$weight_before,
-               -.data$weight_after,
-               -.data$roast_notes,
-               -.data$taste_notes) %>%
-        select(`Date uploaded` = .data$date_uploaded,
-               `Roaster name` = .data$name,
-               `Roast machine` = .data$roast_machine,
-               `Farm` = .data$roast_farm,
-               Country = .data$country,
-               Region = .data$region,
-               `Quality/Grade` = .data$quality,
-               `Processing method` = .data$processing_method,
-               Variety = .data$variety
-               ) %>%
-        # mutate(`Weight loss` = ifelse(is.na(weight_before), 0, round((
-        #   weight_before * 100 / weight_after
-        # ), 1))) %>%
-        # mutate_if(is.integer, as.character) %>%
-        # mutate_if(is.double, as.character) %>%
-        # select(-weight_before, -weight_after) %>%
-        pivot_longer(cols = everything(), values_to = "data") %>%
-        gt::gt() %>%
-        gt::tab_style(
-          style = list(
-            gt::cell_borders(
-              sides = "all",
-              color = "white",
-              style = "solid",
-              weight = gt::px(0)
-            ),
-            gt::cell_text(font = "Verdana", size = "0.8vw")
-          ),
-          locations = gt::cells_body(columns = everything(),
-                                     rows = everything())
-        ) %>%
-        gt::tab_style(gt::cell_text(weight = "bold"),
-                      locations = gt::cells_body(columns = 1)) %>%
-        gt::tab_options(
-          column_labels.hidden = TRUE,
-          table_body.border.bottom.color = "white",
-          table_body.border.top.color = "white"
-        )
-    } else {
-      gt::gt()
-    }
-  })
-  # output$roasting_db_data <- renderFormattable({
-  #   if (length(input$selected_filename) > 5 | input$selected_filename != "" | !is.null(input$selected_filename)) {
-  #     open_profile_by_filename() %>%
-  #       select(-filename, -primary_key) %>%
-  #       mutate(`Weight loss` = ifelse(is.na(weight_before), 0, round((weight_before*100/weight_after),1))) %>%
-  #       mutate_if(is.integer, as.character) %>%
-  #       mutate_if(is.double, as.character) %>%
-  #       select(-weight_before, - weight_after) %>%
-  #       pivot_longer(cols = everything(), values_to = "data") %>%
-  #       formattable::formattable(.,
-  #                                list(
-  #                                  name = formattable::formatter("span", style = "color:#AAAAAA; font-size:14px; font-weight:bold;border-color:#fff"),
-  #                                  data = formattable::formatter("span", style = "color:#AAAAAA;font-size:14px;border-color:#fff")
-  #                                ))
-  #   }
-  #   else {
-  #     formattable::formattable()
-  #   }
+  # roasting_profile_data <- reactive({
+  #   # if (length(input$selected_filename) > 5 | input$selected_filename != "" | !is.null(input$selected_filename)) {
+  #   open_profile_by_filename_json() %>%
+  #       get_event_times() %>%
+  #       # select(.data$fc_time_start, .data$sc_time_start, .data$drop_time) %>%
+  #       select(`First Crack` = .data$fc_time_start, `Second crack` = .data$sc_time_start, `Roast time` = .data$drop_time) %>%
+  #       mutate_if(is.POSIXct, format, format = "%M:%S") %>%
+  #       pivot_longer(cols = everything(), values_to = "data")
   # })
+  #  -------------- Gather data for gt tables --------------------
+  examine_profile_summary_table <- reactive({
+  open_profile_by_filename() %>%
+    select(-.data$filename,
+           -.data$primary_key) %>%
+    select(`Date uploaded` = .data$date_uploaded,
+           `Roaster name` = .data$name,
+           `Roast machine` = .data$roast_machine,
+           `Farm` = .data$roast_farm,
+           Country = .data$country,
+           Region = .data$region,
+           `Quality/Grade` = .data$quality,
+           `Processing method` = .data$processing_method,
+           Variety = .data$variety
+    ) %>%
+    pivot_longer(cols = everything(), values_to = "data")
+  })
+  #  -------------- Mods for gt tables --------------------
+  mod_chart_summary_table_template_server("roasting_db_data", examine_profile_summary_table())
+
+
   #  -------------- The Roast Profile --------------------
 
   #  -------------- The Roast Profile datatable --------------------
@@ -295,7 +231,7 @@ app_server <- function( input, output, session ) {
         "region",
         "quality",
         "processing_method"
-        # "roast_notes"
+        # "variety" this is saved later since it is a list, must be converted to string
         )
 
   # Collect the form data and save it into the "data" list variable
@@ -321,20 +257,6 @@ app_server <- function( input, output, session ) {
   # When submit button is pushed, save the form data - it doesn't change the data - just saves it ??
   observeEvent(input$save_record, {
 
-    # After button is pushed, check for these validations, if not satisfied a message will pop
-    # feedbackWarning(
-    #   "weight_before",
-    #   !is.numeric(input$weight_before) |
-    #     input$weight_before <= 0,
-    #   "Enter valid number"
-    # )
-    # feedbackWarning(
-    #   "weight_after",
-    #   !is.numeric(input$weight_after) |
-    #     input$weight_after <= 0,
-    #   "Enter valid number"
-    # )
-
     feedbackWarning("variety", is.null(input$variety), "Enter variety")
 
     # Conditions we want all to be true. Returns true if all are met.
@@ -354,8 +276,7 @@ app_server <- function( input, output, session ) {
       !is.null(input$variety),
       is_file_valid
     )
-    # sub <- input$roast_curves_upload$datapath
-    # print(sub)
+
     # Then open alog, returns a long string
     opened_json <- open_profile_as_json(alog_input = input$roast_curves_upload$datapath)
 
@@ -369,10 +290,9 @@ app_server <- function( input, output, session ) {
                                            region = input$region)
 
     # Saves opened JSON profile in the folder. Cannot be an R object.
-    tosave <- jsonlite::toJSON(profile_as_json)
+    save_profile_json(profile_as_json, saved_filename)
 
-    write(tosave, paste0("data-raw/saved/",saved_filename))
-
+    # This saves the SQL db part
     # Make the filename list so we can append to all_inputs_to_save
     save_filename_list <- c("filename" = saved_filename) %>% as.list()
 
@@ -391,7 +311,7 @@ app_server <- function( input, output, session ) {
 
     # Then save all the inputs!
     record_status <-
-      upload_roast_profiles(all_inputs_to_save, "roast_profiles") # name of db table
+      update_roast_profiles(all_inputs_to_save, "roast_profiles") # name of db table
 
     showModal(modalDialog(
       title = "Update Success",
@@ -401,26 +321,20 @@ app_server <- function( input, output, session ) {
   })
 
   # When the new button is pushed, need session object so clear out fields
-  # update_profile_fields <- function(profile_data) {
-  #   profile <- profile_data
-  # }
+ observeEvent(input$roast_curves_upload$datapath, {
+    if (!is.null(input$roast_curves_upload)) {
+          opened_json <-
+            open_profile_as_json(alog_input = input$roast_curves_upload$datapath)
 
-  output$uploaded_data_preview <- function() {
-    if (valid_profile_upload()) {
-      opened_json <-
-        open_profile_as_json(alog_input = input$roast_curves_upload$datapath)
-      # message(input$roast_curves_upload$datapath)
+          # Convert opened JSON into R format :)
+          profile_as_json <-
+            jsonlite::fromJSON(opened_json)
 
-      # Convert opened JSON into R format :)
-      profile_as_json <-
-        jsonlite::fromJSON(opened_json)
-
-      get_data_to_display_at_upload(profile_as_json) %>%
-        tidyr::pivot_longer(cols = 1:7, values_to = "data") %>%
-        kableExtra::kbl(col.names = c("", ""), align = "l", centering = FALSE) %>%
-        kableExtra::kable_minimal()
-    } else{
-      return(NULL)
+          upload_this <- get_data_to_display_at_upload(profile_as_json) %>%
+            tidyr::pivot_longer(cols = 1:7, values_to = "data")
+    mod_chart_summary_table_template_server("uploaded_data_preview", upload_this)
     }
-  }
+
+  })
+
 }
