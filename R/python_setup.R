@@ -11,4 +11,4 @@ python_path = Sys.getenv('PYTHON_PATH')
 # Create virtual env and install dependencies. Need to run first 2 only once.
 # reticulate::virtualenv_create(envname = virtualenv_dir, python = python_path)
 # reticulate::virtualenv_install(virtualenv_dir, packages = PYTHON_DEPENDENCIES, ignore_installed=TRUE)
-# reticulate::use_virtualenv(virtualenv_dir, required = T)
+reticulate::use_virtualenv(virtualenv_dir, required = T)

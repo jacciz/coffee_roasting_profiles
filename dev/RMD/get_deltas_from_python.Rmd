@@ -12,9 +12,11 @@ json <-
 
 
 ```{r}
+reticulate::source_python("C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/inst/app/www/get_ror_curves_r_as_input.py")
+
 # Bring python script into R
-reticulate::source_python("../data-raw/get_ror_curves.py")
-all = py$get_ror_curves(file_raw ='../data-raw/saved/Haiti--2021-02-09-20-15-17.json' )
+reticulate::source_python("../inst/app/www/get_ror_curves_r_as_input.py")
+all = py$get_ror_curves(file_raw ='../data-raw/saved/Haiti--2021-02-09-20-15-17.json')
 
 ```
 ```{r}

@@ -17,12 +17,6 @@ from scipy.signal import savgol_filter
 #print(data)
 # filename = 'C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/saved/Haiti--2021-02-09-20-15-17.json'
 
-def import_games_json(file): #import json and outputs a df with selected columns
-    with open(file, 'r', encoding='utf-8') as tweet_data:
-      games_tweet = [json.loads(line) for line in tweet_data.readlines()]
-      game_df = json_normalize(games_tweet)
-    game_df_selected = game_df[['timex', 'temp1', 'temp2', 'timeindex']]
-    return game_df_selected
 # print(import_games_json()["temp2"][0])
 # print(len(data["timex"]))
 # game_tweets = import_games_json()
@@ -384,16 +378,17 @@ def recomputeDeltas(timex,CHARGEidx,DROPidx,t1,t2,optimalSmoothing=False,timex_l
 #         writer.writerow(tup)
 
 # doesnt read correctly if read df from R
-def get_ror_curves(file_raw):
-  df = import_games_json(file_raw)
+def get_ror_curves_r(r_df, charge, drop):
+  # df = import_games_json(file_raw)
   # df = file_raw
   # TP_idx DROP_time
-  CHARGEidx = df["timeindex"][0][0]  # or do max and min??
-  DROPidx = max(df["timeindex"][0]) # df["timeindex"][0][3] #491 ??
-  timex = tuple(df["timex"][0]) #  ( - time_idx??)
-  t1 = tuple(df["temp1"][0]) # very low temps?? 383.954
-  t2 = tuple(df["temp2"][0]) # ??
-  deltas = recomputeDeltas(timex=timex,CHARGEidx = CHARGEidx,DROPidx = DROPidx,t1 = t1,t2=t2)
+  CHARGEidx = int(charge)
+  DROPidx = int(drop)
+  timex = tuple(r_df["timex"]) #  ( - time_idx??)
+  t1 = tuple(r_df["ET"])
+  t2 = tuple(r_df["BT"]) 
+  deltas = recomputeDeltas(timex=timex, CHARGEidx = CHARGEidx, DROPidx = DROPidx, t1 = t1, t2=t2)
   df = pandas.DataFrame(deltas)
   return(df)
+  # return(print(timex))
 # df = import_games_json( 'C:/Users/jacci/Documents/DS 710/coffee_roasting_profiles/data-raw/saved/Angola--2021-03-05-18-06-43.json')

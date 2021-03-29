@@ -12,7 +12,7 @@ app_ui <- function(request) {
     navbarPage(
       theme = shinytheme("united"),
       "Coffee",
-      #  -------------- The Roast Profile Tab --------------------
+#  -------------- The Roast Profile Tab -------------------- ####
       tabPanel(
 
         "Examine roast profile",
@@ -26,11 +26,6 @@ app_ui <- function(request) {
                   </i><h4 style="display:inline-block;">&ensp;Load File</h4>'
                            )),
                          htmlOutput("get_filenames_saved")),
-            # sidebarPanel(
-            #   width = 12,
-            #   h4("Roast Statistics"),
-            #   formattableOutput("roasting_profile_data")
-            # ),
             sidebarPanel(
               width = 12,
               # h4("Roast Summary"),
@@ -40,9 +35,6 @@ app_ui <- function(request) {
                   '<img src="www/noun_Coffee.png" style="width:24px;height:24px;">
                   </i><h4 style="display:inline-block;">&ensp;Roast Summary</h4>'
                 )),
-
-              # formattableOutput("roasting_db_data"),
-              # gt::gt_output("roasting_db_data")
               mod_chart_summary_table_template_ui("roasting_db_data")
               # style = "overflow-x: scroll;"
             )
