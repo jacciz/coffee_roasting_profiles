@@ -1,3 +1,4 @@
+# TODO
 #' Display data at upload # CHECK IF NO DROP TIME check
 #'
 #' Grabs certain fields for display.
@@ -18,7 +19,7 @@ get_data_to_display_at_upload <- function(json_file) {
     "Bean notes: " = as.character(json_file[["beans"]]) # notes
   )
 }
-
+# TODO
 #' Get special events and times
 #'
 #' It also subtracts TP_idx from all times so start time = charge time.
@@ -37,7 +38,7 @@ get_special_event_times <- function(json_file) {
     dplyr::filter(.data$time_of_event > 0) %>%
     dplyr::mutate(color = ifelse(grepl("^Fan", .data$type_of_event), "#0f1fff", "#ff0f0f"))
 }
-
+# TODO
 #' Get times and temps for graph. Subract TP_idx from all times
 #'
 #' It also subracts TP_idx from all times so start time = charge time.
@@ -52,7 +53,7 @@ get_data_of_times_temps <- function(json_file) {
          BT = as.character(json_file[["temp2"]]))
   tib %>% dplyr::mutate(time = .data$time - time_index) %>% dplyr::filter(.data$time > 0)
 }
-
+# TODO
 #' Get tp, dry, fc, sc, drop times
 #'
 #' @inheritParams get_data_to_display_at_upload
@@ -81,11 +82,11 @@ get_event_times <- function(json_file) {
 #' @inheritParams get_data_to_display_at_upload
 #'
 #' @export
-get_data_of_phase_times <- function(json_file) {
+get_data_of_phase_times <- function(profile) {
   tibble::tibble(
-    Dry = (json_file[["computed"]][["dryphasetime"]][[1]]),
-    Mid = (json_file[["computed"]][["midphasetime"]][[1]]),
-    Dev = (json_file[["computed"]][["finishphasetime"]][[1]])
+    Dry = profile[["computed.dryphasetime"]],
+    Mid = profile[["computed.midphasetime"]],
+    Dev = profile[["computed.finishphasetime"]]
   )
 }
 

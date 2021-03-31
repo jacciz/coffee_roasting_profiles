@@ -94,8 +94,44 @@ extract_time_temps <- function(raw_alog, charge_time) {
     dplyr::select(Time1, Time2, ET, BT, Event, timex)
   combined[is.na(combined)] <- ""
   combined
-  # If we want to save as csv
-  # all_format <- readr::format_delim(combined, delim = "\t")
-  # together <- paste0(first_line, "\n", all_format)
-  # writeLines(together, "data-raw/saved/test.csv")
+}
+
+#' Puts string into a clean df, incl deltas
+#'
+#' @param raw_alog string of open alog file
+#'
+#' @return wide df with times, deltas, temps as type 'list'
+#' @export
+#'
+#' @examples
+clean_raw_alog <- function(raw_alog) {
+  opened_alog <- open_profile_as_df(raw_alog)
+
+  charge = opened_alog$computed.TP_idx
+  drop = opened_alog$computed.DROP_time
+
+  time_with_temps <-
+    extract_time_temps(raw_alog, charge_time = charge_idx)
+
+  deltas <- extract_deltas(time_with_temps, charge, drop)
+
+  purrr::map(deltas, list) %>% rbind() %>% cbind(opened_alog, .)
+}
+
+#' Title
+#'
+#' @param temps_df
+#' @param wide_format
+#'
+#' @return
+#' @export
+#'
+#' @examples
+save_profile_as_csv <- function(temps_df, wide_format){
+  # Must first select columns we need
+  formatted_temps <- readr::format_delim(temps_df, delim = "\t")
+  first_line <- first_line_of_csv(wide_format)
+
+  together <- paste0(first_line, "\n", formatted_temps)
+  writeLines(together, "data-raw/saved/test.csv")
 }

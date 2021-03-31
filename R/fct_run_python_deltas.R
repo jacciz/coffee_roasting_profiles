@@ -2,16 +2,20 @@
 
 #' Get deltas via python scrips
 #' Read python functions and run it. Returns a raw df with 2 rows of delta1 and delta2
-#' @param filename_to_open complete file location and filename 'folder/file.json'
+#'
+#' @param alog
+#' @param charge_idx
+#' @param drop_idx
+#'
 #' @noRd
-get_python_deltas <- function(filename_to_open) {
+get_python_deltas <- function(alog, charge_idx, drop_idx) {
   # requireNamespace(reticulate)
+
   require("reticulate")
-  reticulate::source_python(".//inst/app/www/get_ror_curves.py")
-  py$get_ror_curves(file_raw = filename_to_open)
+  reticulate::source_python(".//inst/app/www/get_ror_curves_r_as_input.py")
+  py$get_ror_curves_r(time_with_temps, charge_idx, drop_idx)
 }
 
-#
 #' Put python deltas into clean df
 #'
 #' Puts into a df with 2 delta columns. Removed NULL and NaN.
@@ -43,5 +47,22 @@ add_times_to_delta <-
     time_length = length(time_list)
     cleaned_deltas %>%
       dplyr::slice_tail(n = time_length) %>%
-    dplyr::mutate(timex = time_list, BT = all_times$BT, ET = all_times$ET)
+    dplyr::mutate(timex = time_list, Time1 = all_times$Time1, Time2 = all_times$Time2, BT = all_times$BT, ET = all_times$ET, Event = all_times$Event)
   }
+
+
+#' Gets final delta df
+#'
+#' @param time_df
+#' @param charge_idx c
+#' @param drop_idx
+#'
+#' @return
+#' @export
+#'
+#' @examples
+extract_deltas <- function(time_df, charge_idx, drop_idx) {
+  # time_with_temps <- extract_time_temps(raw_alog, charge_idx)
+  deltas = get_python_deltas(time_df, charge_idx, drop_idx) %>% clean_deltas_from_python()
+  add_times_to_delta(deltas, time_df)
+}
