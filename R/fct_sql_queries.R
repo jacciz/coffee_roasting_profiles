@@ -90,7 +90,12 @@ update_roast_profiles <-
 #' @noRd
 save_profile_json <- function(json_as_df, filename){
   tosave <- jsonlite::toJSON(json_as_df)
-  write(tosave, paste0("data-raw/saved/",filename))
+  write(tosave, paste0("data-raw/saved/", filename))
 }
 # tosave <- jsonlite::toJSON(open_profile_by_filename_json())
 # write(tosave, paste0("data-raw/saved/",saved_filename))
+
+append_to_table <- function(table, file){
+  pool::dbAppendTable(pool, table, file)
+}
+

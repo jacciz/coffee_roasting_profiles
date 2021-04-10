@@ -1,54 +1,48 @@
-#' Open .alog file
+#' Open .alog file into a string
 #'
-#' This opens the .alog file that was opened, reads it, returns string.
+#' This opens the .alog file that was opened, reads it, returns string. Must
+#' replace ' and change True/False so it has quotes in order to read as a JSON.
 #' @param alog_input raw alog file
 #'
 #' @noRd
 open_profile_as_json <-
   function(alog_input) {
-    # Reads and puts it in a long string
+
     sub <- readLines(alog_input)
     # incomplete final line found on (c..) - could be bc you need to add line at
-    # end of json Must replace ' and change True/False so it has quotes in order
-    # to read as a JSON
+    # end of json \
     sub <- gsub("\\'", '"', sub)
     sub <- gsub("True", '\"True\"', sub)
     sub <- gsub("False", '\"False\"', sub)
     sub
   }
 
-#' Get profile name
+#' Make profile filename to save
 #'
 #' Creates a filename based on profile, returns  with location where it is saved
 #' (i.e. data/filename.json)
-#' @param profile_as_json opened json file
-#' @param country country input
-#' @param region region input
 #'
-#' @noRd
-get_profile_filename <- function(profile_as_json, country, region) {
-  # Create filename based on roast date, country and region
-  # Using date and roast time to ensure a unique filename
-  sprintf(
-    "%s-%s-%s-%s.json",
-    # "data-raw/saved/",
-    # location to save
-    country,
-    region,
-    profile_as_json$roastisodate,
-    gsub(":", "-", profile_as_json$roasttime)
-  )
-}
+# get_profile_filename <- function(profile_as_json, country, region) {
+#   # Create filename based on roast date, country and region
+#   # Using date and roast time to ensure a unique filename
+#   sprintf(
+#     "%s-%s-%s-%s.json",
+#     # "data-raw/saved/",
+#     # location to save
+#     country,
+#     region,
+#     profile_as_json$roastisodate,
+#     gsub(":", "-", profile_as_json$roasttime)
+#   )
+# }
 
-#' Opens raw alog (char)
+#' Opens raw alog (string)
 #'
-#' @param raw_alog first uploaded alog
+#' @param raw_alog uploaded alog as a string
 #'
 #' @return wide format df with 110 variables
-#' @export
-#'
-#' @examples
-open_profile_as_df <- function(raw_alog){
+#' @noRd
+make_profile_a_df <- function(raw_alog){
   raw_alog %>% tidyjson::spread_all()
 }
 
@@ -57,12 +51,9 @@ open_profile_as_df <- function(raw_alog){
 #' @param raw_alog first uploaded alog
 #' @param charge_time charge time, must be an integer
 #'
-#' @return
-#' @export
-#'
-#' @examples
+#' @return a long df with Time1, Time2, ET, BT, Event, timex
+#' @noRd
 extract_time_temps <- function(raw_alog, charge_time) {
-
   # Gather arrays we want. Columns are named as to match CSV so Artisan can read them.
   timex = raw_alog %>% tidyjson::enter_object(timex) %>% tidyjson::gather_array()
   temp1 = raw_alog %>% tidyjson::enter_object(temp1) %>% tidyjson::gather_array()
@@ -96,42 +87,32 @@ extract_time_temps <- function(raw_alog, charge_time) {
   combined
 }
 
-#' Puts string into a clean df, incl deltas
+#' Puts string into a clean df, incl deltas.
 #'
-#' @param raw_alog string of open alog file
+#' Combines functions to make a final df
+#' @param raw_alog string of opened alog file
 #'
 #' @return wide df with times, deltas, temps as type 'list'
-#' @export
-#'
-#' @examples
+#' @noRd
 clean_raw_alog <- function(raw_alog) {
-  opened_alog <- open_profile_as_df(raw_alog)
+  opened_alog <- make_profile_a_df(raw_alog)
 
-  charge = opened_alog$computed.TP_idx
-  drop = opened_alog$computed.DROP_time
+  # Minus 1 so times match up
+  # These can be missing. Will be NULL
+  charge = opened_alog$computed.TP_idx - 1
+  # drop = opened_alog$computed.DROP_time
+
+# TODO A message to user
+  if(length(grep("computed.DROP_time", names(opened_alog))) != 1){
+    drop = 0} else{
+      drop = opened_alog$computed.DROP_time
+    }
 
   time_with_temps <-
-    extract_time_temps(raw_alog, charge_time = charge_idx)
+    extract_time_temps(raw_alog, charge_time = charge)
 
   deltas <- extract_deltas(time_with_temps, charge, drop)
 
-  purrr::map(deltas, list) %>% rbind() %>% cbind(opened_alog, .)
+  purrr::map(deltas, list) %>% rbind() %>% cbind(., opened_alog)
 }
 
-#' Title
-#'
-#' @param temps_df
-#' @param wide_format
-#'
-#' @return
-#' @export
-#'
-#' @examples
-save_profile_as_csv <- function(temps_df, wide_format){
-  # Must first select columns we need
-  formatted_temps <- readr::format_delim(temps_df, delim = "\t")
-  first_line <- first_line_of_csv(wide_format)
-
-  together <- paste0(first_line, "\n", formatted_temps)
-  writeLines(together, "data-raw/saved/test.csv")
-}

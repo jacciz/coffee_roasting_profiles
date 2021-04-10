@@ -33,8 +33,8 @@ from scipy.signal import savgol_filter
 # t1 = tuple(import_games_json()["temp1"][0])
 # t2 = tuple(import_games_json()["temp2"][0])
 
-    # computes the RoR over the time and temperature arrays tx and temp via polynoms of degree 1 at index i using a window of wsize
-    # the window size wsize needs to be at least 2 (two succeeding readings)
+# computes the RoR over the time and temperature arrays tx and temp via polynoms of degree 1 at index i using a window of wsize
+# the window size wsize needs to be at least 2 (two succeeding readings)
 def polyRoR(tx,temp,wsize,i):
     if i == 0: # we duplicate the first possible RoR value instead of returning a 0
         i = 1
@@ -55,7 +55,8 @@ def arrayRoR(tx,temp,wsize):
 # 'flat' results in moving average
 # window_len should be odd
 # based on http://wiki.scipy.org/Cookbook/SignalSmooth
-def smooth(x, y, window_len=15, window='hanning'):
+# changed window_len from 15 to 7 to match curvefilter (331221)
+def smooth(x, y, window_len=7, window='hanning'):
     try:
         if len(x) == len(y) and len(x) > 1:
             if window_len > 2:
@@ -96,9 +97,10 @@ def smooth(x, y, window_len=15, window='hanning'):
 
 def smooth_list(a, b, window_len = 7, window='hanning',decay_weights=None,decay_smoothing=False,fromIndex=-1,toIndex=0,re_sample=True,back_sample=True,a_lin=None):  # default 'hanning'
     window_len = 7
-    decay_smoothing= None
+    decay_smoothing= False
     decay_weights=None
     filterDropOuts = True # Smooth Spikes
+    
     if len(a) > 1 and len(a) == len(b) and (filterDropOuts or window_len>2):
         #pylint: disable=E1103
         # 1. truncate
@@ -180,11 +182,14 @@ def recomputeDeltas(timex,CHARGEidx,DROPidx,t1,t2,optimalSmoothing=False,timex_l
     RoRlimitm = 0
 # system fixed RoR limits (only applied if flag is True; usually higher than the user configurable once and always applied)
     maxRoRlimit = 170
+    
+    # update the aw.qmc.deltaBTspan and deltaETspan from the given sampling interval, aw.qmc.deltaETsamples and aw.qmc.deltaBTsamples
+    # interval is expected in seconds (either from the profile on load or from the sampling interval set for recording)
     deltaBTsamples = int(max(1,10 / 1))  #int(max(1,self.deltaBTspan / interval))
     deltaETsamples = int(max(1,1 / 1))
-    deltaETfilter = 3#1
+    deltaETfilter = 3#1 find these in artisan-settings
     deltaBTfilter = 21#10
-    #print(len(numpy.array(timex)))
+    
     try:
         tx_roast = numpy.array(timex)
         lt = len(tx_roast)

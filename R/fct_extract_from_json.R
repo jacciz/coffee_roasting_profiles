@@ -1,4 +1,3 @@
-# TODO
 #' Display data at upload # CHECK IF NO DROP TIME check
 #'
 #' Grabs certain fields for display.
@@ -7,74 +6,17 @@
 #'
 #' @return df in wide format
 #' @export
-get_data_to_display_at_upload <- function(json_file) {
-  weight_loss_var = ifelse(is.null(json_file[["computed"]][["weight_loss"]]), 0, json_file[["computed"]][["weight_loss"]])
+get_data_to_display_at_upload <- function(profile) {
+  weight_loss_var = ifelse(is.null(profile[["computed.weight_loss"]]), 0, profile[["computed.weight_loss"]])
   tibble::tibble(
-    "Roast date: " = as.character(json_file[["roastisodate"]]),
-    "Roast time: " = as.character(json_file[["roasttime"]]),
-    "Weight before: " = as.character(json_file[["computed"]][["weightin"]]),
-    "Weight after: " = as.character(json_file[["computed"]][["weightout"]]),
+    "Roast date: " = as.character(profile[["roastisodate"]]),
+    "Roast time: " = as.character(profile[["roasttime"]]),
+    # "Weight before: " = as.character(profile[["computed.weightin"]]),
+    # "Weight after: " = as.character(profile[["computed.weightout"]]),
     "Weight loss: " = paste0(weight_loss_var, "%"),
-    "Weight units: " = as.character(json_file[["weight"]][3]),
-    "Bean notes: " = as.character(json_file[["beans"]]) # notes
+    # "Weight units: " = as.character(profile[["weight"]]),
+    "Bean notes: " = as.character(profile[["beans"]]) # notes
   )
-}
-# TODO
-#' Get special events and times
-#'
-#' It also subtracts TP_idx from all times so start time = charge time.
-#'
-#' @inheritParams get_data_to_display_at_upload
-#'
-#' @export
-get_special_event_times <- function(json_file) {
-  time_index = as.numeric(json_file[["computed"]][["TP_idx"]][[1]]) # When charge time starts
-  # drop_ index = json_file[["computed"]][["DROP_time"]][[1]]
-  tib <-
-    tibble::tibble(time_of_event = as.numeric(json_file[["specialevents"]]),
-                   type_of_event = as.character(json_file[["specialeventsStrings"]]))
-  tib %>%
-    dplyr::mutate(time_of_event = .data$time_of_event - time_index) %>%
-    dplyr::filter(.data$time_of_event > 0) %>%
-    dplyr::mutate(color = ifelse(grepl("^Fan", .data$type_of_event), "#0f1fff", "#ff0f0f"))
-}
-# TODO
-#' Get times and temps for graph. Subract TP_idx from all times
-#'
-#' It also subracts TP_idx from all times so start time = charge time.
-#'
-#' @inheritParams get_data_to_display_at_upload
-#'
-#' @export
-get_data_of_times_temps <- function(json_file) {
-  time_index = as.numeric(json_file[["computed"]][["TP_idx"]][[1]]) # When charge time starts
-  tib <- tibble::tibble(time = as.numeric(json_file[["timex"]]),
-         ET = as.character(json_file[["temp1"]]),
-         BT = as.character(json_file[["temp2"]]))
-  tib %>% dplyr::mutate(time = .data$time - time_index) %>% dplyr::filter(.data$time > 0)
-}
-# TODO
-#' Get tp, dry, fc, sc, drop times
-#'
-#' @inheritParams get_data_to_display_at_upload
-#'
-#' @export
-get_event_times <- function(json_file) {
-  tibble::tibble(
-    time_zero = lubridate::as_datetime("1970-01-01 00:00:00 UTC"),
-    tp_time = lubridate::as_datetime(json_file[["computed"]][["TP_time"]][[1]]),
-    dry_time = lubridate::as_datetime(json_file[["computed"]][["DRY_time"]][[1]]), # This may be automatic
-    fc_time_start = ifelse(is.null(json_file[["computed"]][["FCs_time"]][[1]]), 0, json_file[["computed"]][["FCs_time"]][[1]]),
-    fc_time_end = ifelse(is.null(json_file[["computed"]][["FCe_time"]][[1]]), 0, json_file[["computed"]][["FCe_time"]][[1]]),
-    sc_time_start = ifelse(is.null(json_file[["computed"]][["SCs_time"]][[1]]), 0, json_file[["computed"]][["SCs_time"]][[1]]),
-    sc_time_end = ifelse(is.null(json_file[["computed"]][["SCe_time"]][[1]]), 0, json_file[["computed"]][["SCe_time"]][[1]]),
-    drop_time = lubridate::as_datetime(json_file[["computed"]][["DROP_time"]][[1]]),
-    max_temp = 500,
-    development_time = .data$drop_time - .data$fc_time_start
-  ) %>% dplyr::mutate(fc_time_start = lubridate::as_datetime(.data$fc_time_start),
-                      fc_time_end = lubridate::as_datetime(.data$fc_time_end),
-                      sc_time_start = lubridate::as_datetime(.data$sc_time_start),
-                      sc_time_end = lubridate::as_datetime(.data$sc_time_end))
 }
 
 #' Get 3 phase lengths
@@ -83,10 +25,12 @@ get_event_times <- function(json_file) {
 #'
 #' @export
 get_data_of_phase_times <- function(profile) {
-  tibble::tibble(
-    Dry = profile[["computed.dryphasetime"]],
-    Mid = profile[["computed.midphasetime"]],
-    Dev = profile[["computed.finishphasetime"]]
-  )
+  if (length(grep("^computed.*phasetime$", names(profile))) != 3) {
+    return(tibble::tibble(Dry = 0, Mid = 0, Dev = 0))
+  } else{
+    tibble::tibble(Dry = profile[["computed.dryphasetime"]],
+                   Mid = profile[["computed.midphasetime"]],
+                   Dev = profile[["computed.finishphasetime"]])
+  }
 }
 

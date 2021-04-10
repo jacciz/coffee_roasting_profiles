@@ -19,13 +19,13 @@ usethis::use_package( "shinydashboardPlus")
 
 ## Add modules ----
 ## Create a module infrastructure in R/
-golem::add_module( name = "chart_summary_table_template" ) # Name of the module
+golem::add_module( name = "DT_summary_table" ) # Name of the module
 golem::add_module( name = "name_of_module2" ) # Name of the module
 
 ## Add helper functions ----
 ## Creates ftc_* and utils_*
-golem::add_fct( "get_python_deltas" )
-golem::add_utils( "json_helpers" )
+golem::add_fct( "prepare_data_DT_table" )
+golem::add_utils( "plotly_helpers" )
 
 ## External resources
 ## Creates .js and .css files at inst/app/www

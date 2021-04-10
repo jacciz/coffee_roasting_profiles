@@ -9,5 +9,12 @@ CREATE TABLE roast_profiles(
     [quality] NVARCHAR(15) NULL,
     [processing_method] NVARCHAR(30) NULL,
     [variety] NVARCHAR(50) NULL,
+    [beans]
+    NUMBER(1)
+    [time] BLOB NULL,
+
+
     [filename] NVARCHAR(50) NULL
 );
+
+# NUMBER(1) is Boolean

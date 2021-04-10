@@ -4,7 +4,7 @@
 \alias{get_data_to_display_at_upload}
 \title{Display data at upload # CHECK IF NO DROP TIME check}
 \usage{
-get_data_to_display_at_upload(json_file)
+get_data_to_display_at_upload(profile)
 }
 \arguments{
 \item{json_file}{json file that is read}

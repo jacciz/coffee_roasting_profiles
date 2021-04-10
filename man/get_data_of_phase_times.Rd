@@ -4,10 +4,7 @@
 \alias{get_data_of_phase_times}
 \title{Get 3 phase lengths}
 \usage{
-get_data_of_phase_times(json_file)
-}
-\arguments{
-\item{json_file}{json file that is read}
+get_data_of_phase_times(profile)
 }
 \description{
 Get 3 phase lengths
